@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 
 	char send_buf[BUFFERSIZE];
 	FILE *fp;
-	int i,send_byte=0,read_byte=0;
+	int send_byte=0,read_byte=0;
 
 	if ((fp = fopen(filename, "r")) == NULL) {
 		fprintf(stderr, "Error: can not open file\n");
@@ -75,6 +75,7 @@ int main(int argc, char **argv)
 	//printf("%s\n",send_buf);
 	printf("Complete sending %s to %s:%d\n", filename, dst_ip_str, port);
 	fclose(fp);
+	return 0;
 }
 
 
