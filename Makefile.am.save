@@ -8,12 +8,17 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+EXTRA_DIST = reconf configure
+SUBDIRS = m4 src doc
+
 SERVER_BIN = server 
 CLIENT_BIN = client
-SERVER_SRC = 
+SERVER_SRC = LS
+LS
+exit
+
 DEPS = $(wildcard ./src/*.h)
-CLIENT_OBJ = client.o udp_input.o udp_output.o
-SERVER_OBJ = server.o udp_input.o udp_output.o 
+OBJ =  $(patsubst %c,%o,$(wildcard ./src/*.c))
 CFLAGS = -g -Wall
 #CFLAGS += -fprofile-arcs -ftest-coverage  # for coverage measurement
 FMT = -linux
@@ -21,16 +26,15 @@ FMT = -linux
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: $(SERVER_BIN) $(CLIENT_BIN) 
+all: $(BIN) $(CLIENT) 
 
-$(CLIENT_BIN): $(CLIENT_OBJ)
+$(CLIENT): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) 
 
-$(SERVER_BIN): $(SERVER_OBJ)
+$(BIN): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(CLIENT_OBJ) $(CLIENT_BIN) $(SERVER_OBJ) $(SERVER_BIN) *.gcno *.gcda *.gcov TAGS
-
+	rm -f $(OBJ) $(BIN) *.gcno *.gcda *.gcov TAGS
 
 

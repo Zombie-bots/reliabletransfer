@@ -10,28 +10,3 @@
 
 EXTRA_DIST = reconf configure
 SUBDIRS = m4 src doc
-
-BIN = server 
-CLIENT = client
-SRC = $(wildcard ./src/*.c)
-DEPS = $(wildcard ./src/*.h)
-OBJ =  $(patsubst %c,%o,$(wildcard ./src/*.c))
-CFLAGS = -g -Wall
-#CFLAGS += -fprofile-arcs -ftest-coverage  # for coverage measurement
-FMT = -linux
-
-%.o: %.c $(DEPS)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-all: $(BIN) $(CLIENT) 
-
-$(CLIENT): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) 
-
-$(BIN): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
-
-clean:
-	rm -f $(OBJ) $(BIN) *.gcno *.gcda *.gcov TAGS
-
-
