@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <getopt.h>
-
-#define BUFFERSIZE 4096
-
+#include "client.h"
 int main(int argc, char **argv)
 {
 	char ch, *filename = (char*) "receivefile.txt", *src_ip_str = (char*) "127.0.0.1";
@@ -64,7 +53,7 @@ int main(int argc, char **argv)
 
 	char receive_buf[BUFFERSIZE];
 	FILE *fp;
-	int i, src_addr_len = sizeof(src_addr);
+	int src_addr_len = sizeof(src_addr);
 
 	if ((fp = fopen(filename, "w")) == NULL) {
 		fprintf(stderr, "Error: can not open file\n");
@@ -73,7 +62,7 @@ int main(int argc, char **argv)
 
 	printf("Got prepared to receive file\n");
 	
-	int flag = 1, recv_size=0, write_size=0;
+	size_t recv_size=0, write_size=0;
 	while ((recv_size=recvfrom(sock, receive_buf, BUFFERSIZE, 0, (struct sockaddr *) &src_addr, &src_addr_len)) > 0) {
 		//printf("receiving %s from %s:%d\n", filename, src_ip_str, htons(src_addr.sin_port));
 		//printf("recv_size %d\n",recv_size);
@@ -90,5 +79,6 @@ int main(int argc, char **argv)
 		}
 		
 	}
+	return 0;
 }
 
