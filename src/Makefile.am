@@ -31,6 +31,3 @@ $(SERVER_BIN): $(SERVER_OBJ)
 
 clean:
 	rm -f $(CLIENT_OBJ) $(CLIENT_BIN) $(SERVER_OBJ) $(SERVER_BIN) *.gcno *.gcda *.gcov TAGS
-
-
-
