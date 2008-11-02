@@ -89,7 +89,7 @@ AUTOMAKE = ${SHELL} /home/hide1713/workspace/udp/config/missing --run automake-1
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=none
-CFLAGS = -g -Wall
+CFLAGS = -g -O2
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -177,13 +177,6 @@ top_builddir = .
 top_srcdir = .
 EXTRA_DIST = reconf configure
 SUBDIRS = m4 src doc
-BIN = server 
-CLIENT = client
-SRC = $(wildcard ./src/*.c)
-DEPS = $(wildcard ./src/*.h)
-OBJ = $(patsubst %c,%o,$(wildcard ./src/*.c))
-#CFLAGS += -fprofile-arcs -ftest-coverage  # for coverage measurement
-FMT = -linux
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -548,6 +541,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-recursive
+
 clean-am: clean-generic mostlyclean-am
 
 distclean: distclean-recursive
@@ -621,20 +616,6 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
 	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am
 
-
-%.o: %.c $(DEPS)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-all: $(BIN) $(CLIENT) 
-
-$(CLIENT): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) 
-
-$(BIN): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
-
-clean:
-	rm -f $(OBJ) $(BIN) *.gcno *.gcda *.gcov TAGS
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
