@@ -1,0 +1,20 @@
+;; Object udp/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "udp/"
+  :tables (list 
+   (semanticdb-table "Makefile.am"
+    :major-mode 'makefile-automake-mode
+    :tags '(("EXTRA_DIST" variable (:default-value ("reconf" "configure")) nil [469 499]) ("SUBDIRS" variable (:default-value ("m4" "src" "doc")) nil [499 520]) ("BIN" variable (:default-value ("server")) nil [521 535]) ("CLIENT" variable (:default-value ("client")) nil [535 551]) ("SRC" variable (:default-value ("./src/server.c")) nil [551 572]) ("DEPS" variable (:default-value ("./src/server.h")) nil [572 593]) ("OBJ" variable (:default-value ("$(patsubst %c,%o,$(wildcard ./src/*.c))")) nil [593 640]) ("CFLAGS" variable (:default-value ("-g" "-Wall")) nil [640 658]) ("FMT" variable (:default-value ("-linux")) nil [728 741]) ("%.o" function (:arguments ("%.c" "$(DEPS)")) nil [742 789]) ("all" function (:arguments ("$(BIN)" "$(CLIENT)")) nil [789 812]) ("$(CLIENT)" function (:arguments ("$(OBJ)")) nil [813 859]) ("$(BIN)" function (:arguments ("$(OBJ)")) nil [859 901]) ("clean" function nil nil [901 956]))
+    :file "Makefile.am"
+    :pointmax 957
+    )
+   (semanticdb-table "NEWS"
+    :major-mode 'c-mode
+    :tags 'nil
+    :file "NEWS"
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre4"
+  :semanticdb-version "2.0pre4"
+  )

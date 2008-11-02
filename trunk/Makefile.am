@@ -1,0 +1,37 @@
+# Copyright (C) 2008 Lei Chen <lc6@indiana.edu>
+#  
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without 
+# modifications, as long as this notice is preserved.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+EXTRA_DIST = reconf configure
+SUBDIRS = m4 src doc
+
+BIN = server 
+CLIENT = client
+SRC = $(wildcard ./src/*.c)
+DEPS = $(wildcard ./src/*.h)
+OBJ =  $(patsubst %c,%o,$(wildcard ./src/*.c))
+CFLAGS = -g -Wall
+#CFLAGS += -fprofile-arcs -ftest-coverage  # for coverage measurement
+FMT = -linux
+
+%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+all: $(BIN) $(CLIENT) 
+
+$(CLIENT): $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) 
+
+$(BIN): $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+clean:
+	rm -f $(OBJ) $(BIN) *.gcno *.gcda *.gcov TAGS
+
+
