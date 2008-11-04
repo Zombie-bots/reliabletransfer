@@ -1,0 +1,44 @@
+Design a header that both the server and the client will use
+ - packets are of a fixed 1024 byte size
+ - no options exist, fixed header
+ - support the ACK flag only
+ - server and client programs accept AdvertisedWindow as a fixed command line parameter
+ - no urgent data, thus no need to provision for UrgPtr
+ - discuss the header you design in report
+
+Implement sliding window algorithm
+ - use duplicate acknowledgments
+ - cumulative acknowledgments are allowed
+
+Implement adaptive retransmission
+ - implement Jacobson/Karels algorithm to estimate round trip time (RTT)
+
+Implement congestion control
+ - implement both slow start and congestion avoidance (additive increase/multiplicative decrease)
+ - when the server switches from slow start to congestion avoidance occurs
+ - the number and percentage of packets that are transferred in each phase
+
+Simulate loss and delay
+ - enable and disable each of these features as needed during your demonstration
+  -- variable packet loss rate
+  -- high latency communication
+
+Implement selective acknowledgments
+ - switch between duplicate and selective acknowledgments
+ - describe in the report
+
+Provide sequence number wrap-around protection
+ - prevent ambiguity when the sequence number wraps around
+
+
+Report:
+Discuss the header you design
+Describe the implement of selective acknowledgments
+Cite the book in code if use the sliding window algorithm implement in the text book
+
+
+File to be transferred, IP address of the client, and port the client is listening on will be specified as command line arguments to the server
+Server does NOT need to be able to support multiple clients during a single invocation
+Code does not need to be able to send a file from the client to the server
+Client must save the data it receives from the server in a file
+Allow the transmission of both text and binary data files
