@@ -12,6 +12,7 @@ HEADER_OBJ=../src/header.o header_test.o
 LINK_LIST_OBJ=../src/link_list.o ../src/checksum.o ../src/header.o link_list_test.o
 TIMEOUT_OBJ=../src/timeout.o timeout_test.o 
 MISC_OBJ=../src/misc.o misc_test.o
+SW_OBJ=../src/sw.o sw_test.o
 CFLAGS = -g -Wall
 #DEPS= ../src/header.h 
 #CFLAGS += -fprofile-arcs -ftest-coverage  # for coverage measurement
@@ -19,7 +20,10 @@ CFLAGS = -g -Wall
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: header_test link_list_test timeout_test misc_test
+all: header_test link_list_test timeout_test misc_test sw_test
+
+sw_test: $(SW_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) 
 
 header_test: $(HEADER_OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) 
@@ -35,4 +39,4 @@ misc_test: $(MISC_OBJ)
 
 clean:
 	rm -f *.o
-	rm -f header_test link_list_test timeout_test misc_test  
+	rm -f header_test link_list_test timeout_test misc_test sw_test 
