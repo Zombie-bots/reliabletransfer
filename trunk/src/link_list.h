@@ -1,18 +1,19 @@
 #ifndef LINK_LIST_HEADER
-#define LINK_LINS_HEADER
+#define LINK_LIST_HEADER
+#include "header.h"
 struct node
 {
-	int data;
-	struct node *next;
-}*p;
+  int data;//SeqNum
+  int timeout_counter;
+  packet_t sent_packet;
+  struct node *next;
+};
 
-delnode(int num);
-append(int num);
-addbeg(int num);
-addafter(int num, int loc);
-display(struct node *r);
-count();
-reverse(struct node *q);
+struct node  *TIMER_LIST;
 
-#define NULL 0
+void decreasetime();
+void append(struct node *pnode);
+void movetoend(struct node *temp);
+void delnode(int num);
+
 #endif
