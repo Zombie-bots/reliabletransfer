@@ -1,7 +1,11 @@
 #include "../src/timeout.h"
 #include <stdio.h>
-int main()
+#include "utils.h"
+int main(int argc, char *argv[])
 {
-printf("timeout %d",timeout(32));
-return 0;
+	init_test(argc,argv);
+	fprintfd(stderr,"debug level normal\n");
+	fprintft(stderr,"debug level detail\n");
+	printf("timeout %d",timeout(32));
+	return 0;
 }

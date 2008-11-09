@@ -15,6 +15,7 @@ AC_INIT([reliable_udp],
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE([dist-bzip2])
+AC_DEFINE([Linux], [], [Ubuntu])
 
 LF_CONFIGURE_CC
 LF_HOST_TYPE
