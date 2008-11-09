@@ -5,6 +5,7 @@
 extern int EST_RTT;
 extern int DEV;
 
+/* This function implements Jacobson algorithm */
 int timeout(int sam_rtt)
 {
   sam_rtt -= EST_RTT;            //diff
