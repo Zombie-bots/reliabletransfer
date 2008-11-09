@@ -25,17 +25,17 @@ int main()
 
   //calculate the checksum for node num 4 and check it
   assert(fill_header(2, 4, 0, ACK, (packet_t*) &node.sent_packet) == 0);
-  u_char buffer[4] = {0,1,1,0};
-  assert(fill_packet((u_char*) buffer, (packet_t*) &node.sent_packet, 4) == 0);
-  u_char dest_addr[] = {1,2,3,4};
-  u_char src_addr[] = {4,3,2,1};
-  node.sent_packet.header.checksum = add_checksum(4, src_addr, dest_addr,
-      0, (u_short *)&node.sent_packet.payload);
+  u_char buffer[5] = {7,32,8,1,56};
+  assert(fill_packet((u_char*) buffer, (packet_t*) &node.sent_packet, 5) == 0);
+  u_char dest_addr[] = {2,5,6,2};
+  u_char src_addr[] = {4,4,7,0};
+  node.sent_packet.header.checksum = add_checksum(5, src_addr, dest_addr,
+      1, (u_short *)&node.sent_packet.payload);
   u_short sum;
-  sum = dest_addr[0]+dest_addr[2]+src_addr[0]+src_addr[2]+buffer[0]+buffer[2];
+  sum = dest_addr[0]+dest_addr[2]+src_addr[0]+src_addr[2]+buffer[0]+buffer[2]+buffer[4];
   sum = sum<<8;
-  sum += dest_addr[0]+dest_addr[2]+src_addr[0]+src_addr[2]+buffer[0]+buffer[2];
-  sum += 17+4;
+  sum += dest_addr[1]+dest_addr[3]+src_addr[1]+src_addr[3]+buffer[1]+buffer[3];
+  sum += 17+5;
   sum = ~(u_short)sum;
   assert(node.sent_packet.header.checksum == sum);
 
