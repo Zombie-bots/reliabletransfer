@@ -1,8 +1,6 @@
 #ifndef HEADER_HEADER
 #define HEADER_HEADER
 #include <sys/types.h>
-#include <string.h>
-#include <stdlib.h>
 #define ACK 1
 #define FIN 2
 #define HEADER_SIZE 8
