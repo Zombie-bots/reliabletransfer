@@ -9,7 +9,7 @@ struct node
   struct node *next;
 };
 
-struct node  *TIMER_LIST;
+extern struct node  *TIMER_LIST;
 
 void decreasetime();
 void append(struct node *pnode);
