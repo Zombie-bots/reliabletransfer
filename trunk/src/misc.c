@@ -1,5 +1,6 @@
 #include "misc.h"
-
+short init_seq_number=0;
+short cur_seq_number=0;
 /*
  * input possibility range from 0-100 , max sleep time msec,
  *  It randomly sleep for less msec millaseconds. If no sleep return
