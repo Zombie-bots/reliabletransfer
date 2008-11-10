@@ -1,4 +1,3 @@
-#include "rudp_server.h"
 #include "udp_output.h"
 
 int rudp_send(int socket, const void *buffer, size_t length, int flags)
@@ -10,6 +9,6 @@ int rudp_send(int socket, const void *buffer, size_t length, int flags)
 		p_node=(struct node *)malloc(sizeof(sturct node));
 		fill_header(
 	}
-	
-	
+
+
 }

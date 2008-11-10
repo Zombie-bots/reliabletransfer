@@ -1,7 +1,7 @@
 #ifndef TIMEOUT_HEADER
 #define TIMEOUT_HEADER
-int EST_RTT = 0;
-int DEV = 0;
+extern int EST_RTT;
+extern int DEV;
 
 int timeout(int sam_rtt);
 #endif

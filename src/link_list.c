@@ -1,4 +1,5 @@
 #include "link_list.h"
+struct node  *TIMER_LIST;
 
 /*THIS FUNCTION ADDS A NODE AT THE END OF LINKED LIST */
 void append(struct node *pnode)
