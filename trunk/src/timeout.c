@@ -1,9 +1,8 @@
-#ifndef TIMEOUT_HEADER
-//#include "timeout.h"
-#endif
+#include "timeout.h"
 
-extern int EST_RTT;
-extern int DEV;
+
+int EST_RTT=0;
+int DEV=0;
 
 /* This function implements Jacobson algorithm */
 int timeout(int sam_rtt)

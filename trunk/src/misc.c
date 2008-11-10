@@ -44,3 +44,8 @@ unsigned short gen_rand_seq()
    seqNumber=rand();
    return seqNumber;
 }
+
+void init_rand()
+{
+  srand(1234);
+}
