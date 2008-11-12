@@ -11,6 +11,6 @@
 #include <getopt.h>
 #include "header.h"
 
-#define BUFFERSIZE PAYLOAD_SIZE*4
+#define BUFFERSIZE (PAYLOAD_SIZE)*4
 
 #endif
