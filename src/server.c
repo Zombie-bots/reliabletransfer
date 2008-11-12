@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
 	while ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0) {
 		do{
-			send_byte+=sendto(sock, send_buf, read_byte-send_byte, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
+			send_byte+=rudp_send(sock, send_buf, read_byte-send_byte, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
 		}	
 		while(send_byte!=read_byte);
 		//printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
