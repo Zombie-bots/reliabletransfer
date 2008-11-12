@@ -61,6 +61,7 @@ int main(int argc, char **argv)
     } while (write_size != recv_size);
       //printf("write_size %d\n",write_size);
     recv_size = write_size = 0;
+    printf("\nflag %u\n\n",flag);
   } while (flag != FIN);
 
   fclose(fp);

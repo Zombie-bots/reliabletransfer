@@ -55,18 +55,16 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  while ((read_byte = fread(send_buf, 1, BUFFERSIZE,fp)) > 0)
-    {
-      do
-        {
-          send_byte += rudp_send(sock, send_buf, read_byte - send_byte, 0,
-              (struct sockaddr *) &dst_addr, sizeof(dst_addr));
-        }
-      while (send_byte != read_byte);
-      //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-      send_byte = 0;
-      usleep(10000); /* Sleep after send, give receiver little more time */
+  while ((read_byte = fread(send_buf, 1, BUFFERSIZE,fp)) > 0) {
+    do {
+      send_byte += rudp_send(sock, send_buf, read_byte - send_byte, 0,
+      (struct sockaddr *) &dst_addr, sizeof(dst_addr));
     }
+    while (send_byte != read_byte);
+    //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
+    send_byte = 0;
+    usleep(10000); /* Sleep after send, give receiver little more time */
+  }
 
   //printf("%s\n",send_buf);
   printf("Complete sending %s to %s:%d\n", filename, dst_ip_str, port);
