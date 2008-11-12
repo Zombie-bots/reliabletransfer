@@ -17,7 +17,7 @@ typedef struct _header_ {
 
 typedef struct _packet_ {
 	header_t header;
-	u_char payload[1016];
+	u_char payload[PAYLOAD_SIZE];
 } packet_t;
 
 int fill_header(u_short seq, u_short ack, u_short offset, u_short flag, packet_t* packet);

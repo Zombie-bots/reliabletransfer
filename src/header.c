@@ -8,6 +8,7 @@ int fill_header(u_short seq, u_short ack, u_short offset, u_short flag, packet_t
 	assert(packet!=0);
 	packet->header.seq=seq;
 	packet->header.ack=ack;
+	packet->header.checksum=0;
 	packet->header.offset=offset;
 	packet->header.flag=flag;
 	return 0;

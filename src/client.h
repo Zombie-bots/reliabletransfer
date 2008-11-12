@@ -9,6 +9,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <getopt.h>
+#include "header.h"
 
-#define BUFFERSIZE 4096
-#endif 
+#define BUFFERSIZE PAYLOAD_SIZE*4
+
+#endif
