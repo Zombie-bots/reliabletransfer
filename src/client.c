@@ -59,11 +59,12 @@ int main(int argc, char **argv)
     do {
       write_size = fwrite(receive_buf+write_size, 1, recv_size-write_size, fp);
     } while (write_size != recv_size);
-      //printf("write_size %d\n",write_size);
+      printf("write_size %d\n",write_size);
     recv_size = write_size = 0;
-    printf("\nflag %u\n\n",flag);
+    
   } while (flag != FIN);
 
-  fclose(fp);
-  return 0;
+fclose(fp);
+printf("Finish Recv file\n");
+//return 0;
 }
