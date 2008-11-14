@@ -12,6 +12,7 @@ HEADER_OBJ=../src/header.o header_test.o
 LINK_LIST_OBJ=../src/link_list.o ../src/checksum.o ../src/header.o link_list_test.o
 TIMEOUT_OBJ=../src/timeout.o timeout_test.o 
 MISC_OBJ=../src/misc.o misc_test.o
+CONG_CONTROL_OBJ=../src/cong_control.o cong_control_test.o
 SW_OBJ=../src/sw.o sw_test.o
 CFLAGS = -g -Wall
 #DEPS= ../src/header.h 
@@ -20,7 +21,7 @@ CFLAGS = -g -Wall
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: header_test link_list_test timeout_test misc_test sw_test
+all: header_test link_list_test timeout_test misc_test cong_control_test sw_test
 
 sw_test: $(SW_OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) 
@@ -36,7 +37,10 @@ timeout_test: $(TIMEOUT_OBJ)
 
 misc_test: $(MISC_OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
+	
+cong_control_test: $(CONG_CONTROL_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -f *.o
-	rm -f header_test link_list_test timeout_test misc_test sw_test 
+	rm -f header_test link_list_test timeout_test misc_test cong_control_test sw_test

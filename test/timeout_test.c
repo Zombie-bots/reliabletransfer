@@ -6,6 +6,6 @@ int main(int argc, char *argv[])
 	init_test(argc,argv);
 	fprintfd(stderr,"debug level normal\n");
 	fprintft(stderr,"debug level detail\n");
-	printf("timeout %d",timeout(32));
+	printf("timeout %d\n",timeout(32));
 	return 0;
 }
