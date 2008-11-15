@@ -4,20 +4,21 @@
 #include "checksum.h"
 #include "link_list.h"
 #include "misc.h"
-//#include "../test/utils.h"
 #include <time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-struct delay_array
+struct delay_node
 {
   u_short seq;
   time_t tv;
+  struct delay_node *next;
 };
-void init_da();
-void insert_da(u_short seq);
-void traverse_da();
+
+void init_dh();
+void insert_dh(u_short seq);
+void traverse_dh();
 void make_ack(u_short seq, packet_t *ack_p);
 void send_ack(u_short seq);
 int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
