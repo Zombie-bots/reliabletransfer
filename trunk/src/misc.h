@@ -2,8 +2,8 @@
 #define MISC_HEADER
 #include "header.h"
 #include <stdlib.h>
-extern short init_seq_number;
-extern short cur_seq_number;
+extern unsigned short init_seq_number;
+extern unsigned short cur_seq_number;
 /* Add up checksum, return value will be filled in checksum filed in header */
 int simulate_lag(int poss, int msec);
 int packet_lost(int poss);

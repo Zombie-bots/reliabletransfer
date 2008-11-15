@@ -1,5 +1,5 @@
 #include "link_list.h"
-
+#include <assert.h>
 struct node *TIMER_LIST;
 
 /*THIS FUNCTION ADDS A NODE AT THE END OF LINKED LIST */
@@ -37,12 +37,9 @@ void delnode(int num)
   while (temp->next != NULL && temp->next->data != num) {
     temp = temp->next;
   }
-  if (temp->next != NULL) {
-    r = temp->next;
-    temp->next = r->next;
-  } else {
-    exit(-1);
-  }
+  assert(temp->next != NULL);
+  r = temp->next;
+  temp->next = r->next;
 }
 
 /*THIS FUNCTION MOVES A NODE TO THE LIST END */
