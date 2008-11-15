@@ -11,6 +11,12 @@
 #include <getopt.h>
 #include "header.h"
 
-#define BUFFERSIZE (PAYLOAD_SIZE)*4
+#define PACKET_NUM 4
+#define BUFFERSIZE (PAYLOAD_SIZE)*PACKET_NUM
+
+extern struct sockaddr_in src_addr, self_addr;
+extern int sock;
+extern int drop_p, delay_p;
+extern int delay_t;
 
 #endif
