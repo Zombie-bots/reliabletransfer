@@ -1,5 +1,6 @@
 #include "header.h"
 #include <assert.h>
+#include <string.h>
 /* fill header without checksum */
 int fill_header(u_short seq, u_short ack, u_short offset, u_short flag, packet_t* packet)
 {

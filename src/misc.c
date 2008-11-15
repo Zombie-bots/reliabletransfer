@@ -1,6 +1,6 @@
 #include "misc.h"
-short init_seq_number=0;
-short cur_seq_number=0;
+unsigned short init_seq_number=0;
+unsigned short cur_seq_number=0;
 /*
  * input possibility range from 0-100 , max sleep time msec,
  *  It randomly sleep for less msec millaseconds. If no sleep return
@@ -14,7 +14,6 @@ int simulate_lag(int poss, int msec)
  tempRand =(int)(100.0*(temp/(RAND_MAX + 1.0)));
 
  if (tempRand < poss) {
-   usleep(msec*1000);
    return 1;
  } else
    return 0;
