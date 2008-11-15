@@ -3,7 +3,7 @@
 struct sockaddr_in src_addr, self_addr;
 int sock;
 int drop_p = 0, delay_p = 0;
-int delay_t = 1;
+int delay_t = 500000;
 
 int main(int argc, char **argv)
 {
