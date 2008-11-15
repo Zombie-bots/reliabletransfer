@@ -9,7 +9,7 @@ int main()
   int i;
 
   for (i=0; i<test; i++) {
-    if (simulate_lag(30, 1) == 1) {
+    if (simulate_lag(30) == 1) {
       return_true ++;
     }
   }
