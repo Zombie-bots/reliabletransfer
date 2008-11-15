@@ -32,8 +32,7 @@ int main()
   u_char src_addr[] = {13,12,73,10};
   node.sent_packet.header.checksum = htons(add_checksum(13, src_addr, dest_addr,
       1, (u_short *)&node.sent_packet));
-  assert(htons(add_checksum(13, src_addr, dest_addr,
-      1, (u_short *)&node.sent_packet)) == 0);
+  assert(add_checksum(13, src_addr, dest_addr, 1, (u_short *)&node.sent_packet) == 0);
 
   //append them to the list
   append(&node1);
