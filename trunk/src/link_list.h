@@ -1,7 +1,7 @@
 #ifndef LINK_LIST_HEADER
 #define LINK_LIST_HEADER
 #include "header.h"
-#define NULL 0
+//#define NULL 0
 struct node
 {
   int data;//SeqNum

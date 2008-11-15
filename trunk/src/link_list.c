@@ -8,12 +8,12 @@ void append(struct node *pnode)
   struct node *r;
   r = TIMER_LIST;
 
-  while (r->next != NULL) {
+  while (r->next != 0) {
     r = r->next;
   }
   r->next = pnode;
   r = pnode;
-  r->next = NULL;
+  r->next = 0;
 }
 
 /* THIS FUNCTION REDUCES THE timeout_counter FIED VALUE OF EACH NODE */
@@ -22,7 +22,7 @@ void decreasetime()
   struct node *r;
   r = TIMER_LIST->next;
 
-  while (r != NULL) {
+  while (r != 0) {
     r->timeout_counter --;
     r = r->next;
   }
@@ -34,10 +34,10 @@ void delnode(int num)
   struct node *r, *temp;
   temp = TIMER_LIST;
 
-  while (temp->next != NULL && temp->next->data != num) {
+  while (temp->next != 0 && temp->next->data != num) {
     temp = temp->next;
   }
-  assert(temp->next != NULL);
+  assert(temp->next != 0);
   r = temp->next;
   temp->next = r->next;
 }
