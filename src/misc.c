@@ -4,9 +4,9 @@ unsigned short cur_seq_number=0;
 /*
  * input possibility range from 0-100 , max sleep time msec,
  *  It randomly sleep for less msec millaseconds. If no sleep return
- *  0, else return sleep time.
+ *  0, else return 1.
  */
-int simulate_lag(int poss, int msec)
+int simulate_lag(int poss)
 {
  int tempRand=0;
  int temp=rand();
