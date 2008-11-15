@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: can not open file\n");
     exit(EXIT_FAILURE);
   }
-  init_da();
+  init_dh();
 
   printf("Got prepared to receive file\n");
 

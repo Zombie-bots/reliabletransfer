@@ -2,46 +2,55 @@
 #include "client.h"
 #include <assert.h>
 
-struct delay_array da[PACKET_NUM];
+struct delay_node *DELAY_HEAD;
 
-void init_da()
+void init_dh()
 {
-  int i;
-  for (i=0; i<PACKET_NUM; i++) {
-    da[i].tv = 0;
-  }
+  DELAY_HEAD = (struct delay_node *)malloc(sizeof(struct delay_node));
+  DELAY_HEAD->next = NULL;
 }
 
-void insert_da(u_short seq)
+void insert_dh(u_short seq)
 {
-  int i;
-  for (i=0; i<PACKET_NUM; i++) {
-    if (da[i].tv == 0) {
-      da[i].seq = seq;
-      da[i].tv = time(NULL)+delay_t;
-      break;
-    }
+  struct delay_node *p, *node;
+  p = DELAY_HEAD;
+
+  while (p->next != NULL) {
+    p = p->next;
   }
+
+  node = (struct delay_node *)malloc(sizeof(struct delay_node));
+  node->seq = seq;
+  node->tv = time(NULL)+delay_t;
+  node->next = NULL;
+  p->next = node;
+
+  /*
   printf("delay array:\n");
-  for (i=0; i<PACKET_NUM; i++) {
-    if (da[i].tv != 0) {
-      printf("seq: %u time: %ld\n",da[i].seq,da[i].tv);
-    }
+  for (p=DELAY_HEAD->next; p!=NULL; p=p->next) {
+    printf("seq: %u time: %ld\n",p->seq,p->tv);
   }
+  */
 }
 
-void traverse_da()
+void traverse_dh()
 {
-  int i;
+  struct delay_node *p;
+  p = DELAY_HEAD;
   packet_t ack_p;
 
-  for (i=0; i<PACKET_NUM; i++) {
-    if (da[i].tv!=0 && da[i].tv<=time(NULL)) {
-      printf("send delayed ack for packet %u\n",da[i].seq);
-      make_ack(da[i].seq, &ack_p);
+  while (p->next!=NULL) {
+    if (p->next->tv<=time(NULL)) {
+      printf("send delayed ack for packet %u\n",p->next->seq);
+      make_ack(p->next->seq, &ack_p);
       sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
           (struct sockaddr *)(&src_addr),sizeof(src_addr));
-      da[i].tv = 0;
+      struct delay_node *q;
+      q = p->next;
+      p->next = q->next;
+      free(q);
+    } else {
+      p = p->next;
     }
   }
 }
@@ -58,11 +67,11 @@ void send_ack(u_short seq)
 
   if (simulate_lag(delay_p)) {
     printf("packet %u delayed\n",seq);
-    insert_da(seq);
+    insert_dh(seq);
   } else {
     make_ack(seq, &ack_p);
     if (delay_p != 0) {
-      traverse_da();
+      traverse_dh();
     }
     sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
         (struct sockaddr *)(&src_addr),sizeof(src_addr));
@@ -96,15 +105,12 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
       read_packet((u_char *)p,(packet_t*)buffer,(u_short)head.offset);
       p+=head.offset;
     }
-    //printf("received and saved. now send ack\n");
     send_ack(head.seq);
     if (head.flag==FIN) {
       if (delay_p != 0) {
-        int i;
-        do {
-          traverse_da();
-          for (i=0; da[i].tv==0 && i<PACKET_NUM; i++);
-        } while (i!=PACKET_NUM);
+        while (DELAY_HEAD->next!=NULL) {
+          traverse_dh();
+        }
       }
       return (int)head.flag;
     }
