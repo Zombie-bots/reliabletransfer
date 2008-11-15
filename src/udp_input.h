@@ -4,7 +4,7 @@
 #include "checksum.h"
 #include "link_list.h"
 #include "misc.h"
-#include <time.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -12,7 +12,7 @@
 struct delay_node
 {
   u_short seq;
-  time_t tv;
+  struct timeval tv;
   struct delay_node *next;
 };
 

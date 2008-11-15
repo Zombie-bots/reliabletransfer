@@ -2,6 +2,11 @@
 #include "client.h"
 #include <assert.h>
 
+#define timersubtract(c,a,b) (c).tv_sec = ((a).tv_sec - (b).tv_sec); \
+                       (c).tv_usec = ((a).tv_usec - (b).tv_usec); \
+                       if ((c).tv_usec < 0){ \
+                           (c).tv_usec += 1000000000;(c).tv_sec--;}
+
 struct delay_node *DELAY_HEAD;
 
 void init_dh()
@@ -21,7 +26,8 @@ void insert_dh(u_short seq)
 
   node = (struct delay_node *)malloc(sizeof(struct delay_node));
   node->seq = seq;
-  node->tv = time(NULL)+delay_t;
+  gettimeofday(&node->tv, NULL);
+  node->tv.tv_usec += delay_t;
   node->next = NULL;
   p->next = node;
 
@@ -35,12 +41,15 @@ void insert_dh(u_short seq)
 
 void traverse_dh()
 {
+  struct timeval current, diff;
   struct delay_node *p;
   p = DELAY_HEAD;
   packet_t ack_p;
 
   while (p->next!=NULL) {
-    if (p->next->tv<=time(NULL)) {
+    gettimeofday(&current, NULL);
+    timersubtract(diff,p->next->tv,current);
+    if (diff.tv_sec < 0) {
       printf("send delayed ack for packet %u\n",p->next->seq);
       make_ack(p->next->seq, &ack_p);
       sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
