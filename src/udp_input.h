@@ -16,7 +16,8 @@ struct delay_node
   struct delay_node *next;
 };
 
-void init_dh();
+extern struct delay_node *DELAY_HEAD;
+
 void insert_dh(u_short seq);
 void traverse_dh();
 void make_ack(u_short seq, packet_t *ack_p);

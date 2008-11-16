@@ -1,7 +1,10 @@
 #ifndef TIMEOUT_HEADER
 #define TIMEOUT_HEADER
+
 extern int EST_RTT;
 extern int DEV;
+struct timeval TIMEOUT;
 
-int timeout(int sam_rtt);
+void timeout(int sam_rtt);
+
 #endif
