@@ -8,7 +8,7 @@
 #include <assert.h>
 int main(int argc, char **argv)
 {
-  
+
   /* Default input value  */
   char ch, *filename = (char*) "sendfile.txt", *dst_ip_str = (char*) "127.0.0.1";
   int port = 3322;
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 
   printf ("Rudp server now connect to %s:%d from %s, Sending file %s\n"\
 	  ,dst_ip_str,port,source_ip_str,filename);
-	
+
   /* create socket */
 
   if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
@@ -68,13 +68,13 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: can not open send socket\n");
     exit(EXIT_FAILURE);
   }
-	
+
   /* Set socket reuse. Release port after program finished. */
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
 	     sizeof(reuse_addr));
   setsockopt(ack_sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
 	     sizeof(reuse_addr));
-	
+
   /* translate ip address string to ip addres data
    * we need to use this ip to calculate right check sum*/
   memset((char *)&ack_addr, 0, sizeof(ack_addr));
@@ -108,66 +108,59 @@ int main(int argc, char **argv)
   TIMER_LIST->next = (void *)0;
   TIMEOUT.tv_sec = 0;
   TIMEOUT.tv_usec = 1000000;
+  tv.tv_sec=3;
+  tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
   /* Fix me: Time out should be dynamic  */
-  while(1)
-    {
-      tv.tv_sec=3;
-      tv.tv_usec=0;
-      FD_ZERO(&sendfd);
-      FD_ZERO(&ackfd);
-      FD_SET(sock,&sendfd);
-      FD_SET(ack_sock,&ackfd);
-      if ((select(FD_SETSIZE,&ackfd,&sendfd,NULL,&tv))<=0) {
-	/* Time out code put here */
-	printf("time out \n");
-      }
-      /* Receive ACK */
-      if (FD_ISSET(ack_sock,&ackfd)) {
-		  
-	recv_size=recvfrom(ack_sock,
-			   (void *)receive_buf,
-			   BUFFERSIZE, 0,
-			   NULL,NULL);
-	assert(recv_size%PACKET_SIZE==0);
-	int i;
-	header_t head;
-	char * recv_p;
-	recv_p=receive_buf;
-	/* loop through every ack packet */
-	for (i=0;i<recv_size/PACKET_SIZE;i++)
-	  {
-	    read_header(&head,(packet_t*)recv_p);
-	    printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
-	    recv_p+=PACKET_SIZE;
-	  }
-	printf("Recv ACK size %d \n",recv_size);
-	continue;
-      }
-	
-      /* Send data */
-      if (FD_ISSET(sock,&sendfd))
-	{
-	  if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
-	    {
-	      send_byte+=rudp_send(sock, send_buf,	\
-				   read_byte-send_byte, \
-				   0,(struct sockaddr *)&dst_addr, \
-				   sizeof(dst_addr),&ack_addr);
-	      printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-	      send_byte=0;
-	      /* Sleep after send, give receiver little more time */
-	      usleep(1000);
-	    }
-	  else
-	    {	/* Finish all data */
-	      break;
-	    }
-	}
-		
-			
-			
+  while(1) {
+    FD_ZERO(&sendfd);
+    FD_ZERO(&ackfd);
+    FD_SET(sock,&sendfd);
+    FD_SET(ack_sock,&ackfd);
+    if ((select(FD_SETSIZE,&ackfd,&sendfd,NULL,&tv))<=0) {
+      /* Time out code put here */
+      printf("time out \n");
+      //retran(sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
     }
+    /* Receive ACK */
+    if (FD_ISSET(ack_sock,&ackfd)) {
+      recv_size=recvfrom(ack_sock,\
+          (void *)receive_buf,\
+          BUFFERSIZE, 0,\
+          NULL,NULL);
+      assert(recv_size%PACKET_SIZE==0);
+      int i;
+      header_t head;
+      char * recv_p;
+      recv_p=receive_buf;
+      /* loop through every ack packet */
+      for (i=0;i<recv_size/PACKET_SIZE;i++) {
+        read_header(&head,(packet_t*)recv_p);
+        printf("Ack %d Offset %d, Flag %d \n",head.ack,head.offset,head.flag);
+        pro_header_ack(head.ack);
+        tv = TIMEOUT;
+	recv_p+=PACKET_SIZE;
+      }
+      printf("Recv ACK size %d \n",recv_size);
+      continue;
+    }
+
+    /* Send data */
+    if (FD_ISSET(sock,&sendfd)) {
+      if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0) {
+        send_byte+=rudp_send(sock, send_buf,\
+            read_byte-send_byte, \
+            0,(struct sockaddr *)&dst_addr, \
+            sizeof(dst_addr),&ack_addr);
+        printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
+        send_byte=0;
+        /* Sleep after send, give receiver little more time */
+        usleep(1000);
+      } else {	/* Finish all data */
+        break;
+      }
+    }
+  }
 
   printf("Timer list:\n");
   struct node *np;

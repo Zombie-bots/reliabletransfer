@@ -19,6 +19,36 @@
                        if ((c).tv_usec < 0){ \
                            (c).tv_usec += 1000000000;(c).tv_sec--;}
 
+/* THIS FUNCTION REACTS ON RECEIVING AN ACK */
+void pro_header_ack(int seq)
+{
+  struct timeval current, diff;
+  struct node *r;
+  unsigned samplertt;
+
+  /* calculate timeout value */
+  gettimeofday(&current, (void *)0);
+  r = find(seq-1);
+  timersubtract(diff,current,r->next->send_time);
+  printf("Sample RTT: %u microseconds\n",(samplertt = 1000000*diff.tv_sec+diff.tv_usec));
+  timeout(samplertt);
+  printf("New timeout value: %ld microseconds\n",1000000*TIMEOUT.tv_sec+TIMEOUT.tv_usec);
+
+  /* call reac_ack for congestion control */
+  reac_ack();
+  printf("New congestion window size: %d\n",cong_window.size);
+
+  /* delete the node from timer list */
+  delnode(r);
+  printf("Timer list:\n");
+  struct node *np;
+  np = TIMER_LIST->next;
+  while (np != 0) {
+    printf("seq: %u\n", np->data);
+    np = np->next;
+  }
+}
+
 /* THIS FUNCTION DEALS WITH THE RETRANSMISSION ISSUE */
 void retran(int socket, const struct sockaddr *to, socklen_t tolen)
 {
@@ -84,6 +114,14 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       pnode = (struct node *)malloc(sizeof(struct node));
       make_node(&packet, pnode);
       append(pnode);
+
+      printf("Timer list:\n");
+      struct node *np;
+      np = TIMER_LIST->next;
+      while (np != 0) {
+        printf("seq: %u\n", np->data);
+        np = np->next;
+      }
 
     } else {
       /*IS  Last packet */

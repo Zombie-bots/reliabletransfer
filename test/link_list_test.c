@@ -60,7 +60,9 @@ int main()
   assert(p->next == NULL);
 
   //delete the node with data = 4 (a node in the middle of list)
-  delnode(4);
+  struct node *r;
+  r = find(4);
+  delnode(r);
 
   //check the list
   p = TIMER_LIST->next;
@@ -74,7 +76,8 @@ int main()
   assert(p->next == NULL);
 
   //do the same thing to the node with data = 9 (the last node of list)
-  delnode(9);
+  r = find(9);
+  delnode(r);
 
   p = TIMER_LIST->next;
   assert(p->data == 1);
@@ -85,7 +88,8 @@ int main()
   assert(p->next == NULL);
 
   //do the same thing to the node with data = 1 (the first node of list)
-  delnode(1);
+  r = find(1);
+  delnode(r);
 
   p = TIMER_LIST->next;
   assert(p->data == 5);

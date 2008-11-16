@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 
+void pro_header_ack(int seq);
 void retran(int socket, const struct sockaddr *to, socklen_t tolen);
 int rudp_send(int socket, char *buffer, size_t length, int flags,\
 	      const struct sockaddr *to, socklen_t tolen, \
