@@ -122,7 +122,8 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
     //printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
     *recv_size += head.offset;
     if (packet_lost(drop_p) && head.flag!=FIN) {
-      p+=head.offset;
+      next_byte_expected--;
+      //p+=head.offset;
       printf("packet %u dropped\n",head.seq);
       continue;
     } else {

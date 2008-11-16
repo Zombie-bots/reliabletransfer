@@ -19,20 +19,20 @@
 /*
  * sender sequence variable
  */
-unsigned short last_packet_sent = 1000; //send next packet
-unsigned short last_packet_acked = 1000; //last byte ack
-unsigned short send_window = 4; //advertised  window, max rcv buffer, last bye written
+unsigned short last_packet_sent = 0; //send next packet
+unsigned short last_packet_acked = 0; //last byte ack
+unsigned short send_window = 8; //advertised  window, max rcv buffer, last bye written
 
 unsigned short send_congestion_window = 6;
 
-unsigned short initial_seq_number = 1000;
+unsigned short initial_seq_number = 0;
 
 /*
  * receiver sequence  variable
  */
 unsigned short rcvWindow = 4; //receive window
 unsigned short last_byte_received = 1003; //receive next packet , last byte written
-unsigned short next_byte_expected = 1;
+unsigned short next_byte_expected = 0;
 unsigned short init_rec_seq_number = 0;
 
 short
@@ -59,7 +59,7 @@ sender_send_packet(short send_seq_number)
   if (last_packet_sent - last_packet_acked < min(send_window,
       send_congestion_window))
     {
-      last_packet_sent += 1;
+      //last_packet_sent += 1;
       // printf("error1! lastsen: %d, lastAck: %d ", last_packet_sent, last_packet_acked);
       printf("\n error1!");
 
@@ -154,40 +154,19 @@ receiver_receive_packet(short recieve_seq_number)
    }
    */
 }
+
 /*
- int main(void) {
-
- int temp;
- last_packet_sent=initial_seq_number;
- last_packet_acked=initial_seq_number;
- last_byte_received=initial_seq_number;
-
- temp=sender_send_packet(0, 0);
- printf("return : %d",temp);
- //sender_receive_ack(0,0);
- temp=sender_send_packet(0, 0);
- printf("return : %d",temp);
- //sender_receive_ack(0,0);
- temp=sender_send_packet(0, 0);
- printf("return : %d",temp);
- //sender_receive_ack(0,0);
- temp=sender_send_packet(0, 0);
- printf("return : %d",temp);
- //sender_receive_ack(0,0);
-
- temp=sender_send_packet(0,0);
- printf("return : %d",temp);
-
- temp=sender_send_packet(0,0);
- printf("return : %d",temp);
- printf("last_packet_sent: %d",last_packet_sent);
- sender_receive_ack(0,0);
- sender_receive_ack(0,0);
-
- temp=sender_send_packet(0,0);
- printf("return : %d",temp);
- sender_receive_ack(0,0);
-
- return EXIT_SUCCESS;
- }
+ * generate a random 16 bits sequence number
  */
+unsigned short gen_rand_seq()
+{
+   unsigned short seqNumber;
+   seqNumber=rand();
+   return seqNumber;
+}
+
+void init_rand()
+{
+  srand(1234);
+}
+
