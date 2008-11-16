@@ -11,5 +11,5 @@
 void retran(int socket, const struct sockaddr *to, socklen_t tolen);
 int rudp_send(int socket, char *buffer, size_t length, int flags,\
 	      const struct sockaddr *to, socklen_t tolen, \
-	      struct in_addr *src_addr);
+	      struct sockaddr_in *src_addr);
 #endif

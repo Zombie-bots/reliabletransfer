@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 {
   char ch, *filename = (char *) "receivefile.txt", *sa = (char *) "127.0.0.1";
   int port = 3322;
-
+ 
   while ((ch = getopt(argc, argv, "f:p:a:o:l:t:")) != -1) {
     switch (ch) {
       case 'f':

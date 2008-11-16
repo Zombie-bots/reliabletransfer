@@ -1,7 +1,7 @@
 #include "udp_input.h"
 #include "client.h"
 #include <assert.h>
-
+#define ACK_PORT 3323
 #define timersum(c,a,b) (c).tv_sec = ((a).tv_sec + (b).tv_sec); \
                        (c).tv_usec = ((a).tv_usec + (b).tv_usec); \
                        if ((c).tv_usec > 1000000000){ \
@@ -75,7 +75,6 @@ void traverse_dh()
     }
   }
 }
-
 void send_ack(u_short seq)
 {
   packet_t ack_p;
@@ -88,9 +87,10 @@ void send_ack(u_short seq)
     if (delay_p != 0) {
       traverse_dh();
     }
+    src_addr.sin_port=htons(ACK_PORT);
     sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
         (struct sockaddr *)(&src_addr),sizeof(src_addr));
-    //printf("send normal ack for %u\n",seq);
+    printf("send normal ack for %u to port %d\n",seq,ntohs(src_addr.sin_port));
   }
 }
 
