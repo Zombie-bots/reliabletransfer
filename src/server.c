@@ -5,7 +5,7 @@
 #include "server.h"
 #include <netinet/in.h>
 #include <sys/select.h>
-
+#include <assert.h>
 int main(int argc, char **argv)
 {
   
@@ -129,6 +129,18 @@ int main(int argc, char **argv)
 			   (void *)receive_buf,
 			   BUFFERSIZE, 0,
 			   NULL,NULL);
+	assert(recv_size%PACKET_SIZE==0);
+	int i;
+	header_t head;
+	char * recv_p;
+	recv_p=receive_buf;
+	/* loop through every ack packet */
+	for (i=0;i<recv_size/PACKET_SIZE;i++)
+	  {
+	    read_header(&head,(packet_t*)recv_p);
+	    printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
+	    recv_p+=PACKET_SIZE;
+	  }
 	printf("Recv ACK size %d \n",recv_size);
 	continue;
       }
