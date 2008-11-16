@@ -1,5 +1,6 @@
 #include "udp_input.h"
 #include "client.h"
+#include "sw.h"
 #include <assert.h>
 #define ACK_PORT 3323
 #define timersum(c,a,b) (c).tv_sec = ((a).tv_sec + (b).tv_sec); \
@@ -47,7 +48,7 @@ void insert_dh(u_short seq)
 
 void make_ack(u_short seq, packet_t *ack_p)
 {
-  ack_p->header.ack = seq;
+  ack_p->header.ack = seq+1;
   ack_p->header.flag = ACK;
 }
 
@@ -101,15 +102,22 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
   char *p=receive_buf;
   char buffer[PACKET_SIZE];
   header_t head;
+  enum recPkt sw_return;
 
   do {
     size = recvfrom(sock, (void *)buffer, PACKET_SIZE, 0, src_addr, src_addr_len);
-    printf("sourse port: %d", ntohs(((struct sockaddr_in *)src_addr)->sin_port));
+    //printf("sourse port: %d\n", ntohs(((struct sockaddr_in *)src_addr)->sin_port));
     assert (size==PACKET_SIZE);
     assert (add_checksum(size, (u_char *)&(((struct sockaddr_in *)src_addr)->sin_addr.s_addr),
             (u_char *)&(self_addr->sin_addr.s_addr), size%2, (u_short *)buffer) == 0);
     read_header(&head,(packet_t *)buffer);
     assert (head.offset==PAYLOAD_SIZE || head.flag==FIN);
+    sw_return = receiver_receive_packet(head.seq);
+    if (sw_return == dropPkt) {
+      send_ack(next_byte_expected);
+      printf("seq wrong. drop packet %d. send ack for %d\n",head.seq,next_byte_expected);
+      continue;
+    }
 
     //printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
     *recv_size += head.offset;

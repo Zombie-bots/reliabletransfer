@@ -6,6 +6,21 @@
  enum ack {correct_ack,in_window_ack,out_window_ack};
  enum recPkt {dropPkt,acceptPkt};
 
+ extern unsigned short last_packet_sent; //send next packet
+ extern unsigned short last_packet_acked; //last byte ack
+ extern unsigned short send_window; //advertised  window, max rcv buffer, last bye written
+
+ extern unsigned short send_congestion_window;
+
+ extern unsigned short initial_seq_number;
+
+ /*
+  * receiver sequence  variable
+  */
+ extern unsigned short rcvWindow; //receive window
+ extern unsigned short last_byte_received; //receive next packet , last byte written
+ extern unsigned short next_byte_expected;
+ extern unsigned short init_rec_seq_number;
 
 
 /*

@@ -32,19 +32,27 @@ void append(struct node *pnode)
   pnode->next = 0;
 }
 
-/*THIS FUNCTION REMOVES A NODE FROM THE LIST */
-void delnode(int num)
+/*THIS FUNCTION RETURNS A POINTER TO A NODE WHOSE NEXT NODE HAS DATA num */
+struct node *find(int num)
 {
-  struct node *r, *temp;
-  temp = TIMER_LIST;
+  struct node *r;
+  r = TIMER_LIST;
 
-  while (temp->next != 0 && temp->next->data != num) {
-    temp = temp->next;
+  while (r->next != 0 && r->next->data != num) {
+    r = r->next;
   }
-  assert(temp->next != 0);
-  r = temp->next;
-  temp->next = r->next;
-  free(r);
+  assert(r->next != 0);
+  return r;
+}
+
+/*THIS FUNCTION REMOVES A NODE FROM THE LIST */
+void delnode(struct node *r)
+{
+  struct node *temp;
+
+  temp = r->next;
+  r->next = temp->next;
+  free(temp);
 }
 
 /*THIS FUNCTION MOVES A NODE TO THE LIST END */

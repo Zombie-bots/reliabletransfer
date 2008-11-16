@@ -14,9 +14,10 @@ struct node
 
 extern struct node  *TIMER_LIST;
 
+struct node *find(int num);
 void make_node (packet_t *packet, struct node *pnode);
 void append(struct node *pnode);
 void movetoend(struct node *r);
-void delnode(int num);
+void delnode(struct node *r);
 
 #endif
