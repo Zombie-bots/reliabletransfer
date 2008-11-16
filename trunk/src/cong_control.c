@@ -1,7 +1,7 @@
 #include "cong_control.h"
 #include <stdio.h>
 
-struct cong_control cong_window = {SS, 1, 65, 0};
+struct cong_control cong_window = {SS, 1, 16, 0};
 
 void reac_ack()
 {

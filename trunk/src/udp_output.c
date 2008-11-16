@@ -1,6 +1,6 @@
 #include "link_list.h"
 #include "checksum.h"
-#include "misc.h"		/* cur_seq_number,init_seq_number */
+#include "sw.h"		/* cur_seq_number,init_seq_number */
 #include "header.h"
 #include "udp_output.h"
 #include "server.h"
@@ -40,6 +40,7 @@ void pro_header_ack(int seq)
 
   /* delete the node from timer list */
   delnode(r);
+  /*
   printf("Timer list:\n");
   struct node *np;
   np = TIMER_LIST->next;
@@ -47,6 +48,7 @@ void pro_header_ack(int seq)
     printf("seq: %u\n", np->data);
     np = np->next;
   }
+  */
 }
 
 /* THIS FUNCTION DEALS WITH THE RETRANSMISSION ISSUE */
@@ -68,7 +70,7 @@ void retran(int socket, const struct sockaddr *to, socklen_t tolen)
       gettimeofday(&r->next->send_time, (void *)0);
       timersum(r->expire_time, r->send_time, TIMEOUT);
       movetoend(r);
-      usleep(100000);
+      //usleep(100000);
     } else {
       r = r->next;
     }
@@ -99,7 +101,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
   for (; send_size < length; send_size += PAYLOAD_SIZE) {
     if (left_size >= PAYLOAD_SIZE) {
       /* Not last packet */
-      fill_header(cur_seq_number + 1, 0, PAYLOAD_SIZE,ACK, &packet);
+      fill_header(last_packet_sent++, 0, PAYLOAD_SIZE,ACK, &packet);
       fill_packet((u_char*) &buffer[send_size], &packet, PAYLOAD_SIZE);
       /* calculate checksum */
       checksum = add_checksum(PACKET_SIZE,s, d, 0, (u_short*) &packet);
@@ -114,7 +116,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       pnode = (struct node *)malloc(sizeof(struct node));
       make_node(&packet, pnode);
       append(pnode);
-
+      /*
       printf("Timer list:\n");
       struct node *np;
       np = TIMER_LIST->next;
@@ -122,13 +124,13 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
         printf("seq: %u\n", np->data);
         np = np->next;
       }
-
+      */
     } else {
       /*IS  Last packet */
       printf("Last Packet %d \n", left_size);
       memset(&packet, 0, PACKET_SIZE);
       /* fill last packet with FIN flag */
-      fill_header(cur_seq_number + 1, 0, length - send_size, FIN,&packet);
+      fill_header(last_packet_sent++, 0, length - send_size, FIN,&packet);
       fill_packet((u_char*) &buffer[send_size], &packet, length - send_size);
       /* calculate cheksum */
       checksum = add_checksum(PACKET_SIZE,s, d, 0, (u_short*) &packet);
@@ -149,8 +151,8 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
     }
     /* Don't send too fast
        fast send may cause packet lost*/
-    usleep(100000);
-    cur_seq_number++;
+    //usleep(100000);
+    //last_packet_sent++;
   }
   return send_size;
 }

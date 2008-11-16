@@ -15,6 +15,7 @@ void timeout(int sam_rtt)
   sam_rtt -= DEV;                // diff - DEV
   DEV += (sam_rtt >> 2);         // mul. sigma, sigma = 1/4
   TIMEOUT.tv_usec = EST_RTT + (DEV << 2);
+  TIMEOUT.tv_sec=0;
   while (TIMEOUT.tv_usec > 1000000) {
     TIMEOUT.tv_usec -= 1000000;
     TIMEOUT.tv_sec ++;

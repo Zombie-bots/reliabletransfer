@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <sys/select.h>
 #include <assert.h>
+#include "sw.h"
 int main(int argc, char **argv)
 {
 
@@ -106,8 +107,8 @@ int main(int argc, char **argv)
   }
   TIMER_LIST = (struct node *)malloc(sizeof(struct node));
   TIMER_LIST->next = (void *)0;
-  TIMEOUT.tv_sec = 0;
-  TIMEOUT.tv_usec = 1000000;
+  TIMEOUT.tv_sec = 1;
+  TIMEOUT.tv_usec = 0;
   tv.tv_sec=3;
   tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
@@ -138,10 +139,10 @@ int main(int argc, char **argv)
         read_header(&head,(packet_t*)recv_p);
         printf("Ack %d Offset %d, Flag %d \n",head.ack,head.offset,head.flag);
         pro_header_ack(head.ack);
-        tv = TIMEOUT;
+        tv.tv_sec=TIMEOUT.tv_sec;
+	tv.tv_usec=TIMEOUT.tv_usec;
 	recv_p+=PACKET_SIZE;
       }
-      printf("Recv ACK size %d \n",recv_size);
       continue;
     }
 
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
             read_byte-send_byte, \
             0,(struct sockaddr *)&dst_addr, \
             sizeof(dst_addr),&ack_addr);
-        printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
+        //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
         send_byte=0;
         /* Sleep after send, give receiver little more time */
         usleep(1000);
@@ -161,7 +162,7 @@ int main(int argc, char **argv)
       }
     }
   }
-
+  /*
   printf("Timer list:\n");
   struct node *np;
   np = TIMER_LIST->next;
@@ -169,6 +170,7 @@ int main(int argc, char **argv)
     printf("seq: %u\n", np->data);
     np = np->next;
   }
+  */
   //printf("%s\n",send_buf);
   printf("Complete sending %s to %s:%d\n", filename, dst_ip_str, port);
   fclose(fp);

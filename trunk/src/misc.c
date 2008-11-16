@@ -1,6 +1,4 @@
 #include "misc.h"
-unsigned short init_seq_number=0;
-unsigned short cur_seq_number=0;
 /*
  * input possibility range from 0-100 , max sleep time msec,
  *  It randomly sleep for less msec millaseconds. If no sleep return
@@ -33,19 +31,4 @@ int packet_lost(int poss)
    return 1;
  } else
    return 0;
-}
-
-/*
- * generate a random 16 bits sequence number
- */
-unsigned short gen_rand_seq()
-{
-   unsigned short seqNumber;
-   seqNumber=rand();
-   return seqNumber;
-}
-
-void init_rand()
-{
-  srand(1234);
 }
