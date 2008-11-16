@@ -2,18 +2,17 @@
 #include "client.h"
 #include <assert.h>
 
+#define timersum(c,a,b) (c).tv_sec = ((a).tv_sec + (b).tv_sec); \
+                       (c).tv_usec = ((a).tv_usec + (b).tv_usec); \
+                       if ((c).tv_usec > 1000000000){ \
+                           (c).tv_usec -= 1000000000;(c).tv_sec++;}
+
 #define timersubtract(c,a,b) (c).tv_sec = ((a).tv_sec - (b).tv_sec); \
                        (c).tv_usec = ((a).tv_usec - (b).tv_usec); \
                        if ((c).tv_usec < 0){ \
                            (c).tv_usec += 1000000000;(c).tv_sec--;}
 
 struct delay_node *DELAY_HEAD;
-
-void init_dh()
-{
-  DELAY_HEAD = (struct delay_node *)malloc(sizeof(struct delay_node));
-  DELAY_HEAD->next = NULL;
-}
 
 void insert_dh(u_short seq)
 {
@@ -27,7 +26,14 @@ void insert_dh(u_short seq)
   node = (struct delay_node *)malloc(sizeof(struct delay_node));
   node->seq = seq;
   gettimeofday(&node->tv, NULL);
-  node->tv.tv_usec += delay_t;
+  struct timeval delay_tv;
+  delay_tv.tv_usec = delay_t;
+  delay_tv.tv_sec = 0;
+  while (delay_tv.tv_usec >= 1000000) {
+    delay_tv.tv_usec -= 1000000;
+    delay_tv.tv_sec ++;
+  }
+  timersum(node->tv, node->tv, delay_tv);
   node->next = NULL;
   p->next = node;
 
@@ -37,6 +43,12 @@ void insert_dh(u_short seq)
     printf("seq: %u time: %ld\n",p->seq,p->tv);
   }
   */
+}
+
+void make_ack(u_short seq, packet_t *ack_p)
+{
+  ack_p->header.ack = seq;
+  ack_p->header.flag = ACK;
 }
 
 void traverse_dh()
@@ -62,12 +74,6 @@ void traverse_dh()
       p = p->next;
     }
   }
-}
-
-void make_ack(u_short seq, packet_t *ack_p)
-{
-  ack_p->header.ack = seq;
-  ack_p->header.flag = ACK;
 }
 
 void send_ack(u_short seq)
@@ -98,6 +104,7 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
 
   do {
     size = recvfrom(sock, (void *)buffer, PACKET_SIZE, 0, src_addr, src_addr_len);
+    printf("sourse port: %d", ntohs(((struct sockaddr_in *)src_addr)->sin_port));
     assert (size==PACKET_SIZE);
     assert (add_checksum(size, (u_char *)&(((struct sockaddr_in *)src_addr)->sin_addr.s_addr),
             (u_char *)&(self_addr->sin_addr.s_addr), size%2, (u_short *)buffer) == 0);

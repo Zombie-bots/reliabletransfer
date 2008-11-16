@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 CC=gcc
 HEADER_OBJ=../src/header.o header_test.o
-LINK_LIST_OBJ=../src/link_list.o ../src/checksum.o ../src/header.o link_list_test.o
+LINK_LIST_OBJ=../src/link_list.o ../src/checksum.o ../src/header.o ../src/timeout.o link_list_test.o
 TIMEOUT_OBJ=../src/timeout.o timeout_test.o 
 MISC_OBJ=../src/misc.o misc_test.o
 CONG_CONTROL_OBJ=../src/cong_control.o cong_control_test.o

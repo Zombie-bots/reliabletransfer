@@ -8,14 +8,14 @@ int delay_t = 500000;
 int main(int argc, char **argv)
 {
   char ch, *filename = (char *) "receivefile.txt", *sa = (char *) "127.0.0.1";
-  int port = 5320;
+  int port = 3322;
 
-  while ((ch = getopt(argc, argv, "f:p:a:o:l:t:s:")) != -1) {
+  while ((ch = getopt(argc, argv, "f:p:a:o:l:t:")) != -1) {
     switch (ch) {
       case 'f':
         filename = optarg;
         break;
-      case 's':
+      case 'a':
         sa = optarg;
         break;
       case 'o':
@@ -31,7 +31,8 @@ int main(int argc, char **argv)
         port = atoi(optarg);
         break;
       case '?':
-        if (optopt == 'f' || optopt == 'p') {
+        if (optopt=='f' || optopt=='p'|| optopt=='a' || optopt=='l'\
+            || optopt=='o' || optopt=='t') {
           fprintf(stderr, "Option -%c requires an argument\n", optopt);
         } else {
           fprintf(stderr, "Unknown option\n");
@@ -65,7 +66,9 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: can not open file\n");
     exit(EXIT_FAILURE);
   }
-  init_dh();
+
+  DELAY_HEAD = (struct delay_node *)malloc(sizeof(struct delay_node));
+  DELAY_HEAD->next = NULL;
 
   printf("Got prepared to receive file\n");
 
@@ -78,11 +81,11 @@ int main(int argc, char **argv)
     do {
       write_size = fwrite(receive_buf+write_size, 1, recv_size-write_size, fp);
     } while (write_size != recv_size);
-      printf("write_size %d\n",write_size);
+      printf("receive_bytes %d, write_bytes %d\n",recv_size, write_size);
     recv_size = write_size = 0;
   } while (flag != FIN);
 
   fclose(fp);
-  //printf("Finish Recv file\n");
+  printf("Complete receiving file %s\n",filename);
   return 0;
 }
