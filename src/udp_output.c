@@ -28,6 +28,14 @@ void pro_header_ack(int seq)
 
   /* calculate timeout value */
   gettimeofday(&current, (void *)0);
+  printf("Timer list:\n");
+  struct node *np;
+  np = TIMER_LIST->next;
+  while (np != 0) {
+    printf("seq: %u\n", np->data);
+    np = np->next;
+  }
+ 
   r = find(seq-1);
   timersubtract(diff,current,r->next->send_time);
   //printf("Sample RTT: %u microseconds\n",(samplertt = 1000000*diff.tv_sec+diff.tv_usec));
@@ -106,8 +114,6 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
 	/* already_sent is number of packet we have sent in every call
 	   if some packet can not send because of sender_send_packet
 	   next time, we will start from that packet.*/
-	last_packet_sent++;
-	already_send++;
 	printf ("already_send %d last %d\n",already_send,last_packet_sent);
 	
       }
@@ -135,15 +141,10 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       pnode = (struct node *)malloc(sizeof(struct node));
       make_node(&packet, pnode);
       append(pnode);
-      /*
-      printf("Timer list:\n");
-      struct node *np;
-      np = TIMER_LIST->next;
-      while (np != 0) {
-        printf("seq: %u\n", np->data);
-        np = np->next;
-      }
-      */
+      last_packet_sent++;
+      already_send++;
+	
+ 
     } else {
       /*IS  Last packet */
       printf("Last Packet %d \n", left_size);
@@ -162,7 +163,8 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       pnode = (struct node *)malloc(sizeof(struct node));
       make_node(&packet, pnode);
       append(pnode);
-
+      last_packet_sent++;
+      already_send++;
       return length;
     }
     if (real_send_size == -1) {

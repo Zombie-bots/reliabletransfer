@@ -122,9 +122,9 @@ int main(int argc, char **argv)
   tv.tv_sec=3;
   tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
- 
+  int not_finish=1;
   while(1) {
-    int finish=1;
+    
     FD_ZERO(&sendfd);
     FD_ZERO(&ackfd);
     FD_SET(sock,&sendfd);
@@ -132,6 +132,7 @@ int main(int argc, char **argv)
     if ((select(FD_SETSIZE,&ackfd,&sendfd,NULL,&tv))<=0) {
       /* Time out code put here */
       printf("time out \n");
+      continue;
       //retran(sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
     }
     /* Receive ACK */
@@ -149,6 +150,8 @@ int main(int argc, char **argv)
       for (i=0;i<recv_size/PACKET_SIZE;i++) {
         read_header(&head,(packet_t*)recv_p);
         printf("Ack %d Offset %d, Flag %d \n",head.ack,head.offset,head.flag);
+	/* Sliding windows receive ack */
+	sender_receive_ack(head.ack);
         pro_header_ack(head.ack);
         tv.tv_sec=TIMEOUT.tv_sec;
 	tv.tv_usec=TIMEOUT.tv_usec;
@@ -158,28 +161,45 @@ int main(int argc, char **argv)
     }
     
     /* Send data */
-    if (FD_ISSET(sock,&sendfd)) {
-      if (finish)
-	{
-	  read_byte=fread(send_buf,1,BUFFERSIZE,fp);
-	  if (read_byte<=0)
-	    {
-	      break;		/* Finish sending file */
-	    }
-	}
-      send_byte=rudp_send(sock, send_buf,	
-			  read_byte,			\
-			  0,(struct sockaddr *)&dst_addr,	\
-			  sizeof(dst_addr),&ack_addr);
-    
-      //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-      finish=(send_byte==-1)?1:0;
-      /* Sleep after send, give receiver little more time */
-      usleep(1000);
-      
-    }
+    if (FD_ISSET(sock,&sendfd))
+      {
+	/*
+	if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0) {
+	  send_byte+=rudp_send(sock, send_buf,\
+			       read_byte-send_byte, \
+			       0,(struct sockaddr *)&dst_addr, \
+			       sizeof(dst_addr),&ack_addr);
+	  printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
+	  send_byte=0;
+	  // Sleep after send, give receiver little more time
+	  usleep(1000);
+	} else   // Finish all data 
+	  break;
+	*/
+       
+	if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
+	  {
+	    send_byte=rudp_send(sock, send_buf,	
+				read_byte,			\
+				0,(struct sockaddr *)&dst_addr,	\
+				sizeof(dst_addr),&ack_addr);    
+	    //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
+	    // not_finish=(send_byte>0)?1:0;
+	    // Sleep after send, give receiver little more time 
+	    //printf("read_byte %d\n ",read_byte);
+	    usleep(1000);
+	  }
+	else
+	  {
+	    perror("Read file error:");
+	    printf("Send all data, read_byte %d \n",read_byte);
+	    break;		// Finish sending file 
+	  }
+	
+	
+      }
   }
-
+  
   printf("Complete sending %s to %s:%d\n", filename, dst_ip_str, port);
   fclose(fp);
   return 0;
