@@ -63,7 +63,7 @@ void traverse_dh()
     gettimeofday(&current, NULL);
     timersubtract(diff,p->next->tv,current);
     if (diff.tv_sec < 0) {
-      printf("send delayed ack for packet %u\n",p->next->seq);
+      printf("send ack number back to server %u\n",ack_p.header.ack);
       make_ack(p->next->seq, &ack_p);
       sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
           (struct sockaddr *)(&src_addr),sizeof(src_addr));
