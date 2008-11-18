@@ -1,5 +1,6 @@
 #include "sw.h"
 #include <assert.h>
+#include <stdio.h>
 //extern short send_congestion_window;
 //extern short initial_seq_number;
 /*
@@ -23,7 +24,7 @@ unsigned short last_packet_sent = 0; //send next packet
 unsigned short last_packet_acked = 0; //last byte ack
 unsigned short send_window = 8; //advertised  window, max rcv buffer, last bye written
 
-unsigned short send_congestion_window = 6;
+unsigned short send_congestion_window = 16;
 
 unsigned short initial_seq_number = 0;
 
@@ -53,21 +54,20 @@ min(int x, int y)
 int
 sender_send_packet(short send_seq_number)
 {
-  printf("error1111! lastsen: %d, lastAck: %d , seq se:  %d", last_packet_sent,
-      last_packet_acked, send_seq_number);
+  //printf("error1111! lastsen: %d, lastAck: %d , seq se:  %d", last_packet_sent,
+  //last_packet_acked, send_seq_number);
 
   if (last_packet_sent - last_packet_acked < min(send_window,
       send_congestion_window))
     {
       //last_packet_sent += 1;
-      // printf("error1! lastsen: %d, lastAck: %d ", last_packet_sent, last_packet_acked);
-      printf("\n error1!");
-
+      //  printf("error1! lastsen: %d, lastAck: %d ", last_packet_sent, last_packet_acked);
+      printf("sw allow %d \n",send_seq_number);
       return 1;
     }
   else
     {
-      printf("\n error2!");
+      printf("sw reject %d \n",send_seq_number);
       return 0;
     }
 }
@@ -105,7 +105,7 @@ sender_receive_ack(short send_seq_number)
 
       return out_window_ack;
     }
-
+  return out_window_ack;
 }
 
 /*

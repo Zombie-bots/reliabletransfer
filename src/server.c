@@ -13,7 +13,8 @@ int main(int argc, char **argv)
   /* Default input value  */
   char ch, *filename = (char*) "sendfile.txt", *dst_ip_str = (char*) "127.0.0.1";
   int port = 3322;
-  int ack_port = 3323;
+  int ack_port=3323;
+  //int ack_port = 3323;
   char *source_ip_str= (char *) "127.0.0.1";
   int reuse_addr=1;
   /* Socket  */
@@ -21,7 +22,7 @@ int main(int argc, char **argv)
   struct timeval tv;
   struct sockaddr_in dst_addr;
   struct sockaddr_in ack_addr;
-  int sock,ack_sock;
+  int sock;
   char receive_buf[BUFFERSIZE];
   char send_buf[BUFFERSIZE];
   FILE *fp;
@@ -64,41 +65,50 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: can not open send socket\n");
     exit(EXIT_FAILURE);
   }
+  
   /* create ack socket */
+  /*
   if ((ack_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
     fprintf(stderr, "Error: can not open send socket\n");
     exit(EXIT_FAILURE);
   }
-
+  */
   /* Set socket reuse. Release port after program finished. */
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
 	     sizeof(reuse_addr));
+  /*
   setsockopt(ack_sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
 	     sizeof(reuse_addr));
-
+  */
   /* translate ip address string to ip addres data
    * we need to use this ip to calculate right check sum*/
   memset((char *)&ack_addr, 0, sizeof(ack_addr));
   ack_addr.sin_family = AF_INET;
-  ack_addr.sin_port = htons(ack_port);
+  ack_addr.sin_port = htons(port);
   if (inet_aton(source_ip_str, &ack_addr.sin_addr) == 0) {
     fprintf(stderr, "Error: invalid ack address\n");
     exit(1);
   }
-  memset((char *)&dst_addr, 0, sizeof(dst_addr));
+ 
+  memset((char *)&dst_addr, 0, sizeof(dst_addr));  
   dst_addr.sin_family = AF_INET;
-  dst_addr.sin_port = htons(port);
+  dst_addr.sin_port = htons(ack_port);
   if (inet_aton(dst_ip_str, &dst_addr.sin_addr) == 0) {
     fprintf(stderr, "Error: invalid destination address\n");
     exit(1);
   }
 
   /* We need to bind this udp so we know which port returns ack */
-  if (bind(ack_sock, (struct sockaddr *) &ack_addr, sizeof(ack_addr)) == -1) {
+
+  if (bind(sock, (struct sockaddr *) &dst_addr, sizeof(dst_addr)) == -1) {
     fprintf(stderr, "Error: can not bind ack socket\n");
     exit(EXIT_FAILURE);
   }
-  printf("Bind on port %d \n",ack_port);
+  
+  /* After bind port, change port to destination port */
+  dst_addr.sin_port = htons(port);
+  
+  printf("Bind on port %d to send and receive packet\n",ack_port);
   /* Open send file */
 
   if ((fp = fopen(filename, "r")) == NULL) {
@@ -112,20 +122,21 @@ int main(int argc, char **argv)
   tv.tv_sec=3;
   tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
-  /* Fix me: Time out should be dynamic  */
+ 
   while(1) {
+    int finish=1;
     FD_ZERO(&sendfd);
     FD_ZERO(&ackfd);
     FD_SET(sock,&sendfd);
-    FD_SET(ack_sock,&ackfd);
+    FD_SET(sock,&ackfd);
     if ((select(FD_SETSIZE,&ackfd,&sendfd,NULL,&tv))<=0) {
       /* Time out code put here */
       printf("time out \n");
       //retran(sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
     }
     /* Receive ACK */
-    if (FD_ISSET(ack_sock,&ackfd)) {
-      recv_size=recvfrom(ack_sock,\
+    if (FD_ISSET(sock,&ackfd)) {
+      recv_size=recvfrom(sock,\
           (void *)receive_buf,\
           BUFFERSIZE, 0,\
           NULL,NULL);
@@ -145,33 +156,30 @@ int main(int argc, char **argv)
       }
       continue;
     }
-
+    
     /* Send data */
     if (FD_ISSET(sock,&sendfd)) {
-      if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0) {
-        send_byte+=rudp_send(sock, send_buf,\
-            read_byte-send_byte, \
-            0,(struct sockaddr *)&dst_addr, \
-            sizeof(dst_addr),&ack_addr);
-        //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-        send_byte=0;
-        /* Sleep after send, give receiver little more time */
-        usleep(1000);
-      } else {	/* Finish all data */
-        break;
-      }
+      if (finish)
+	{
+	  read_byte=fread(send_buf,1,BUFFERSIZE,fp);
+	  if (read_byte<=0)
+	    {
+	      break;		/* Finish sending file */
+	    }
+	}
+      send_byte=rudp_send(sock, send_buf,	
+			  read_byte,			\
+			  0,(struct sockaddr *)&dst_addr,	\
+			  sizeof(dst_addr),&ack_addr);
+    
+      //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
+      finish=(send_byte==-1)?1:0;
+      /* Sleep after send, give receiver little more time */
+      usleep(1000);
+      
     }
   }
-  /*
-  printf("Timer list:\n");
-  struct node *np;
-  np = TIMER_LIST->next;
-  while (np != 0) {
-    printf("seq: %u\n", np->data);
-    np = np->next;
-  }
-  */
-  //printf("%s\n",send_buf);
+
   printf("Complete sending %s to %s:%d\n", filename, dst_ip_str, port);
   fclose(fp);
   return 0;

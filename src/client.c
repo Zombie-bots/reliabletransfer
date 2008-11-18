@@ -33,9 +33,9 @@ int main(int argc, char **argv)
       case '?':
         if (optopt=='f' || optopt=='p'|| optopt=='a' || optopt=='l'\
             || optopt=='o' || optopt=='t') {
-          fprintf(stderr, "Option -%c requires an argument\n", optopt);
+          fprintf(stderr, "Option -%c requires an argument\n",optopt);
         } else {
-          fprintf(stderr, "Unknown option\n");
+          fprintf(stderr, "Unknown option\n -a client address -o droprate -l delay rate -t delay time (micro second) -p port\n");
         }
         exit(EXIT_FAILURE);
     }
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
     do {
       write_size = fwrite(receive_buf+write_size, 1, recv_size-write_size, fp);
     } while (write_size != recv_size);
-      printf("receive_bytes %d, write_bytes %d\n",recv_size, write_size);
+    printf("receive_bytes %d, write_bytes %d\n",recv_size, write_size);
     recv_size = write_size = 0;
   } while (flag != FIN);
 

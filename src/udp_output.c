@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-
+int already_send=0;
 #define timersum(c,a,b) (c).tv_sec = ((a).tv_sec + (b).tv_sec); \
                        (c).tv_usec = ((a).tv_usec + (b).tv_usec); \
                        if ((c).tv_usec > 1000000000){ \
@@ -30,13 +30,13 @@ void pro_header_ack(int seq)
   gettimeofday(&current, (void *)0);
   r = find(seq-1);
   timersubtract(diff,current,r->next->send_time);
-  printf("Sample RTT: %u microseconds\n",(samplertt = 1000000*diff.tv_sec+diff.tv_usec));
+  //printf("Sample RTT: %u microseconds\n",(samplertt = 1000000*diff.tv_sec+diff.tv_usec));
   timeout(samplertt);
-  printf("New timeout value: %ld microseconds\n",1000000*TIMEOUT.tv_sec+TIMEOUT.tv_usec);
+  //printf("New timeout value: %ld microseconds\n",1000000*TIMEOUT.tv_sec+TIMEOUT.tv_usec);
 
   /* call reac_ack for congestion control */
   reac_ack();
-  printf("New congestion window size: %d\n",cong_window.size);
+  //printf("New congestion window size: %d\n",cong_window.size);
 
   /* delete the node from timer list */
   delnode(r);
@@ -82,9 +82,11 @@ void retran(int socket, const struct sockaddr *to, socklen_t tolen)
  * buffer should aligned by 1016 bytes. which n*PAYLOAD size.
  *
  * */
+
 int rudp_send(int socket, char *buffer, size_t length, int flags,
     const struct sockaddr *to, socklen_t tolen, struct sockaddr_in *src_addr)
 {
+  
   int send_size = 0;
   int real_send_size = 0;
   int left_size = length;
@@ -96,12 +98,29 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
 
   d = (u_char*) &dest->sin_addr.s_addr;
   s = (u_char*) &src_addr->sin_addr.s_addr;
-
-  //printf("length %d\n",length);
-  for (; send_size < length; send_size += PAYLOAD_SIZE) {
+  //printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
+  for (send_size=already_send*(PAYLOAD_SIZE); send_size < length; send_size += (PAYLOAD_SIZE)) {  
+    /* Test if we can send packet,  */
+    if(sender_send_packet(last_packet_sent))
+      {
+	/* already_sent is number of packet we have sent in every call
+	   if some packet can not send because of sender_send_packet
+	   next time, we will start from that packet.*/
+	last_packet_sent++;
+	already_send++;
+	printf ("already_send %d last %d\n",already_send,last_packet_sent);
+	
+      }
+    else 
+      {
+      printf("rudp_send reject sending  packet. because sliding window return false\n");
+      return -1;
+      }
+    if(already_send==length/PAYLOAD_SIZE)already_send=0;
+    //printf("send packet %d left_size %d \n",last_packet_sent,left_size);
     if (left_size >= PAYLOAD_SIZE) {
       /* Not last packet */
-      fill_header(last_packet_sent++, 0, PAYLOAD_SIZE,ACK, &packet);
+      fill_header(last_packet_sent, 0, PAYLOAD_SIZE,ACK, &packet);
       fill_packet((u_char*) &buffer[send_size], &packet, PAYLOAD_SIZE);
       /* calculate checksum */
       checksum = add_checksum(PACKET_SIZE,s, d, 0, (u_short*) &packet);
@@ -130,7 +149,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       printf("Last Packet %d \n", left_size);
       memset(&packet, 0, PACKET_SIZE);
       /* fill last packet with FIN flag */
-      fill_header(last_packet_sent++, 0, length - send_size, FIN,&packet);
+      fill_header(last_packet_sent, 0, length - send_size, FIN,&packet);
       fill_packet((u_char*) &buffer[send_size], &packet, length - send_size);
       /* calculate cheksum */
       checksum = add_checksum(PACKET_SIZE,s, d, 0, (u_short*) &packet);
