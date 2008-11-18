@@ -28,6 +28,7 @@ void pro_header_ack(int seq)
 
   /* calculate timeout value */
   gettimeofday(&current, (void *)0);
+  /*
   printf("Timer list:\n");
   struct node *np;
   np = TIMER_LIST->next;
@@ -35,7 +36,7 @@ void pro_header_ack(int seq)
     printf("seq: %u\n", np->data);
     np = np->next;
   }
- 
+  */
   r = find(seq-1);
   timersubtract(diff,current,r->next->send_time);
   //printf("Sample RTT: %u microseconds\n",(samplertt = 1000000*diff.tv_sec+diff.tv_usec));

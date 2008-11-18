@@ -151,11 +151,12 @@ int main(int argc, char **argv)
         read_header(&head,(packet_t*)recv_p);
         printf("Ack %d Offset %d, Flag %d \n",head.ack,head.offset,head.flag);
 	/* Sliding windows receive ack */
-	sender_receive_ack(head.ack);
-        pro_header_ack(head.ack);
-        tv.tv_sec=TIMEOUT.tv_sec;
-	tv.tv_usec=TIMEOUT.tv_usec;
-	recv_p+=PACKET_SIZE;
+	if(sender_receive_ack(head.ack)==correct_ack)
+	  {pro_header_ack(head.ack);
+	    tv.tv_sec=TIMEOUT.tv_sec;
+	    tv.tv_usec=TIMEOUT.tv_usec;
+	    recv_p+=PACKET_SIZE;
+	  }
       }
       continue;
     }

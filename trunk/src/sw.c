@@ -78,7 +78,7 @@ sender_send_packet(short send_seq_number)
 enum ack
 sender_receive_ack(short send_seq_number)
 {
-  printf("ACK: senSq:  %d, lastAck: %d , last sen:  %d!",
+  printf("ACK: ackSq:  %d, lastAck: %d , last sen:  %d!",
       send_seq_number, last_packet_acked, last_packet_sent);
 
   if ((send_seq_number == last_packet_acked + 1) && (last_packet_acked
