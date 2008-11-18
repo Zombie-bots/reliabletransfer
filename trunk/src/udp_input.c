@@ -2,7 +2,7 @@
 #include "client.h"
 #include "sw.h"
 #include <assert.h>
-#define ACK_PORT 3323
+//#define ACK_PORT 3323
 #define timersum(c,a,b) (c).tv_sec = ((a).tv_sec + (b).tv_sec); \
                        (c).tv_usec = ((a).tv_usec + (b).tv_usec); \
                        if ((c).tv_usec > 1000000000){ \
@@ -88,7 +88,7 @@ void send_ack(u_short seq)
     if (delay_p != 0) {
       traverse_dh();
     }
-    src_addr.sin_port=htons(ACK_PORT);
+    //src_addr.sin_port=htons(ACK_PORT);
     sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
         (struct sockaddr *)(&src_addr),sizeof(src_addr));
     printf("send normal ack for %u to port %d\n",seq,ntohs(src_addr.sin_port));
@@ -119,7 +119,7 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
       continue;
     }
 
-    //printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
+    printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
     *recv_size += head.offset;
     if (packet_lost(drop_p) && head.flag!=FIN) {
       next_byte_expected--;

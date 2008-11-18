@@ -5,7 +5,7 @@
 #define FIN 2
 #define HEADER_SIZE 8
 #define PACKET_SIZE 1024
-#define PAYLOAD_SIZE PACKET_SIZE-HEADER_SIZE
+#define PAYLOAD_SIZE (PACKET_SIZE-HEADER_SIZE)
 
 typedef struct _header_ {
 	u_short seq;
