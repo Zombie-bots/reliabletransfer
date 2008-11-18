@@ -103,10 +103,9 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
   struct sockaddr_in *dest;
   dest = (struct sockaddr_in *) to;
   u_char * s, *d;
-
   d = (u_char*) &dest->sin_addr.s_addr;
   s = (u_char*) &src_addr->sin_addr.s_addr;
-  //printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
+  printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
   for (send_size=already_send*(PAYLOAD_SIZE); send_size < length; send_size += (PAYLOAD_SIZE)) {  
     /* Test if we can send packet,  */
     if(sender_send_packet(last_packet_sent))
@@ -114,15 +113,14 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
 	/* already_sent is number of packet we have sent in every call
 	   if some packet can not send because of sender_send_packet
 	   next time, we will start from that packet.*/
-	printf ("already_send %d last %d\n",already_send,last_packet_sent);
+	//printf ("already_send %d last %d\n",already_send,last_packet_sent);
 	
       }
     else 
       {
-      printf("rudp_send reject sending  packet. because sliding window return false\n");
+      printf("rudp_send reject sending packet. because sliding window return false\n");
       return -1;
       }
-    if(already_send==length/PAYLOAD_SIZE)already_send=0;
     //printf("send packet %d left_size %d \n",last_packet_sent,left_size);
     if (left_size >= PAYLOAD_SIZE) {
       /* Not last packet */
@@ -170,6 +168,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
     if (real_send_size == -1) {
       perror("Fatal Error in rudp_send");
     }
+    if(already_send==length/PAYLOAD_SIZE)already_send=0;
     /* Don't send too fast
        fast send may cause packet lost*/
     //usleep(100000);

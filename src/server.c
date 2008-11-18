@@ -122,7 +122,7 @@ int main(int argc, char **argv)
   tv.tv_sec=3;
   tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
-  int not_finish=1;
+  int not_finish=0;
   while(1) {
     
     FD_ZERO(&sendfd);
@@ -177,14 +177,14 @@ int main(int argc, char **argv)
 	  break;
 	*/
        
-	if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
+	if (not_finish||(read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
 	  {
 	    send_byte=rudp_send(sock, send_buf,	
 				read_byte,			\
 				0,(struct sockaddr *)&dst_addr,	\
 				sizeof(dst_addr),&ack_addr);    
 	    //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-	    // not_finish=(send_byte>0)?1:0;
+	    not_finish=(send_byte>0)?0:1;
 	    // Sleep after send, give receiver little more time 
 	    //printf("read_byte %d\n ",read_byte);
 	    usleep(1000);
