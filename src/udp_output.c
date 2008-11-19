@@ -8,7 +8,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+
 int already_send=0;
+
 #define timersum(c,a,b) (c).tv_sec = ((a).tv_sec + (b).tv_sec); \
                        (c).tv_usec = ((a).tv_usec + (b).tv_usec); \
                        if ((c).tv_usec > 1000000000){ \
@@ -24,24 +26,19 @@ void pro_header_ack(int seq)
 {
   struct timeval current, diff;
   struct node *r;
-  unsigned samplertt;
+  int samplertt;
+
+  r = find(seq-1);
 
   /* calculate timeout value */
-  gettimeofday(&current, (void *)0);
-  /*
-  printf("Timer list:\n");
-  struct node *np;
-  np = TIMER_LIST->next;
-  while (np != 0) {
-    printf("seq: %u\n", np->data);
-    np = np->next;
+  if (r->next->resend == 0) {
+    gettimeofday(&current, (void *)0);
+    timersubtract(diff,current,r->next->send_time);
+    samplertt = 1000000*diff.tv_sec+diff.tv_usec;
+    //printf("Sample RTT: %d microseconds\n",samplertt);
+    timeout(samplertt);
+    printf("New timeout value: %ld microseconds\n",1000000*TIMEOUT.tv_sec+TIMEOUT.tv_usec);
   }
-  */
-  r = find(seq-1);
-  timersubtract(diff,current,r->next->send_time);
-  //printf("Sample RTT: %u microseconds\n",(samplertt = 1000000*diff.tv_sec+diff.tv_usec));
-  timeout(samplertt);
-  //printf("New timeout value: %ld microseconds\n",1000000*TIMEOUT.tv_sec+TIMEOUT.tv_usec);
 
   /* call reac_ack for congestion control */
   reac_ack();
@@ -49,8 +46,6 @@ void pro_header_ack(int seq)
 
   /* delete the node from timer list */
   delnode(r);
-  /*
-  */
 }
 
 void print_timer()
@@ -95,14 +90,18 @@ void retran(int socket, const struct sockaddr *to, socklen_t tolen)
 {
   struct timeval current, diff;
   int real_send_size = 0;
+  int flag_seq = -1;
   struct node *r;
   r = TIMER_LIST;
 
-  while (r->next != 0) {
+  while (r->next!=0 && r->next->sent_packet.header.seq!=flag_seq) {
     gettimeofday(&current, (void *)0);
     timersubtract(diff,r->next->expire_time,current);
     if (diff.tv_sec < 0) {
       real_send_size = sendto(socket, &r->next->sent_packet, PACKET_SIZE, 0, to, tolen);
+      if (flag_seq == -1) {
+        flag_seq = r->next->sent_packet.header.seq;
+      }
       if (real_send_size == -1) {
         perror("Fatal Error in rudp_send");
       }
@@ -125,7 +124,7 @@ void retran(int socket, const struct sockaddr *to, socklen_t tolen)
 int rudp_send(int socket, char *buffer, size_t length, int flags,
     const struct sockaddr *to, socklen_t tolen, struct sockaddr_in *src_addr)
 {
-  
+
   int send_size = 0;
   int real_send_size = 0;
   int left_size = length;
@@ -137,7 +136,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
   d = (u_char*) &dest->sin_addr.s_addr;
   s = (u_char*) &src_addr->sin_addr.s_addr;
   //printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
-  for (send_size=0; send_size < length; send_size += (PAYLOAD_SIZE)) {  
+  for (send_size=0; send_size < length; send_size += (PAYLOAD_SIZE)) {
     /* Test if we can send packet,  */
     if(sender_send_packet(last_packet_sent))
       {
@@ -145,9 +144,9 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
 	   if some packet can not send because of sender_send_packet
 	   next time, we will start from that packet.*/
 	//printf ("already_send %d last %d\n",already_send,last_packet_sent);
-	
+
       }
-    else 
+    else
       {
 	//printf("rudp_send reject sending packet. because sliding window return false\n");
 	return -1;
@@ -172,8 +171,8 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       append(pnode);
       last_packet_sent++;
       //already_send++;
-	
- 
+
+
     } else {
       /*IS  Last packet */
       printf("Last Packet %d \n", left_size);

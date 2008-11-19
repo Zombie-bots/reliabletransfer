@@ -1,5 +1,6 @@
 #include "client.h"
 #include "udp_input.h"
+#include "sw.h"
 struct sockaddr_in src_addr, self_addr;
 int sock;
 int drop_p = 0, delay_p = 0;
@@ -9,11 +10,14 @@ int main(int argc, char **argv)
 {
   char ch, *filename = (char *) "receivefile.txt", *sa = (char *) "127.0.0.1";
   int port = 3322;
- 
-  while ((ch = getopt(argc, argv, "f:p:a:o:l:t:")) != -1) {
+
+  while ((ch = getopt(argc, argv, "f:p:a:o:l:t:w:")) != -1) {
     switch (ch) {
       case 'f':
         filename = optarg;
+        break;
+      case 'w':
+        rcvWindow = atoi(optarg);
         break;
       case 'a':
         sa = optarg;
@@ -32,7 +36,7 @@ int main(int argc, char **argv)
         break;
       case '?':
         if (optopt=='f' || optopt=='p'|| optopt=='a' || optopt=='l'\
-            || optopt=='o' || optopt=='t') {
+            || optopt=='o' || optopt=='t' || optopt=='w') {
           fprintf(stderr, "Option -%c requires an argument\n",optopt);
         } else {
           fprintf(stderr, "Unknown option\n -a client address -o droprate -l delay rate -t delay time (micro second) -p port\n");
@@ -81,7 +85,8 @@ int main(int argc, char **argv)
     // printf("receive_bytes %d\n",recv_size);
     // do {
     fwrite(receive_buf, 1, recv_size, fp);
-    //} while (write_size != recv_size);    
+    //} while (write_size != recv_size);
+
     recv_size = write_size = 0;
   } while (flag != FIN);
 
