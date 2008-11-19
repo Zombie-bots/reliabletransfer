@@ -164,6 +164,8 @@ int main(int argc, char **argv)
 	recv_ack=sender_receive_ack(head.ack);
 	if(recv_ack==correct_ack||recv_ack==in_window_ack)
 	  {
+	    /* call reac_ack for congestion control */
+	    reac_ack();
 	    pro_header_ack(head.ack);
 	    print_timer();
 	    int small_seq=0;
@@ -173,7 +175,7 @@ int main(int argc, char **argv)
 	      }
 	    if(small_seq!=0)
 	      {last_packet_acked=small_seq;}
-	    else 
+	    else
 	      {last_packet_acked=last_byte_received;}
 
 	    tv.tv_sec=TIMEOUT.tv_sec;
@@ -188,6 +190,7 @@ int main(int argc, char **argv)
 	    if (dup_check==3)	/* 3 duplicate ack, fast retransmit */
 	      {
 		sleep(1);
+		reac_tripack();
 		dup_check=0;
 		resend_packet(head.ack,sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
 		print_timer();
@@ -210,7 +213,7 @@ int main(int argc, char **argv)
 	      {
 		/* We need to remove send socket from select() This make sure our
 		   time out codes have a chance to work. Otherwise, select() always can
-		   send. */ 
+		   send. */
 		/* sliding window not allow to send. So we send the same buffer next time */
 		printf("fseek back one packet\n");
 		fseek(fp,-BUFFERSIZE,SEEK_CUR);
