@@ -1,6 +1,7 @@
 #include "sw.h"
 #include <assert.h>
 #include <stdio.h>
+
 //extern short send_congestion_window;
 //extern short initial_seq_number;
 /*
@@ -22,9 +23,9 @@
  */
 unsigned short last_packet_sent = 0; //send next packet
 unsigned short last_packet_acked = 0; //last byte ack
-unsigned short send_window = 8; //advertised  window, max rcv buffer, last bye written
+unsigned short send_window = 32; //advertised  window, max rcv buffer, last bye written
 
-unsigned short send_congestion_window = 16;
+unsigned short send_congestion_window = 33;
 
 unsigned short initial_seq_number = 0;
 
@@ -32,7 +33,7 @@ unsigned short initial_seq_number = 0;
  * receiver sequence  variable
  */
 unsigned short rcvWindow = 4; //receive window
-unsigned short last_byte_received = 1003; //receive next packet , last byte written
+unsigned short last_byte_received = 0; //receive next packet , last byte written
 unsigned short next_byte_expected = 0;
 unsigned short init_rec_seq_number = 0;
 
@@ -92,6 +93,11 @@ sender_receive_ack(short send_seq_number)
   else if (last_packet_acked < send_seq_number && send_seq_number
       < (send_window + last_packet_acked))
     {
+      if(last_byte_received<send_seq_number)
+	{
+	  printf("update last received packet to %d\n",send_seq_number);
+	  last_byte_received=send_seq_number;
+	}
       printf("in_window_ack\n");
       return in_window_ack;
     }

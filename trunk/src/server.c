@@ -132,7 +132,6 @@ int main(int argc, char **argv)
       /* Time out code put here */
       printf("time out \n");
       resend_packet(last_packet_acked,sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
-      sleep(2);
       FD_ZERO(&sendfd);
       FD_ZERO(&ackfd);
       FD_SET(sock,&sendfd);
@@ -155,14 +154,26 @@ int main(int argc, char **argv)
       /* loop through every ack packet */
       for (i=0;i<recv_size/PACKET_SIZE;i++) {
         read_header(&head,(packet_t*)recv_p);
-        printf("receive Ack %d \n",head.ack);
+        printf("receive Ack %d last_packet_acked %d\n",head.ack,last_packet_acked);
 	/* Sliding windows receive ack */
 	recv_ack=sender_receive_ack(head.ack);
-	if(recv_ack==correct_ack)
+	if(recv_ack==correct_ack||recv_ack==in_window_ack)
 	  {pro_header_ack(head.ack);
+	    print_timer();
+	    int small_seq=0;
+	    if (TIMER_LIST->next!=0)
+	      {
+		small_seq=TIMER_LIST->next->data;
+	      }
+	    if(small_seq!=0)
+	      {last_packet_acked=small_seq;}
+	    else 
+	      {last_packet_acked=last_byte_received;}
+
 	    tv.tv_sec=TIMEOUT.tv_sec;
 	    tv.tv_usec=TIMEOUT.tv_usec;
 	    recv_p+=PACKET_SIZE;
+	    printf("The smallest packet is %d\n",small_seq);
 	  }
 	else if (recv_ack==dup_ack)
 	  {
@@ -193,8 +204,9 @@ int main(int argc, char **argv)
 	      {
 		/* We need to remove send socket from select() This make sure our
 		   time out codes have a chance to work. Otherwise, select() always can
-		   send. */
+		   send. */ 
 		/* sliding window not allow to send. So we send the same buffer next time */
+		printf("fseek back one packet\n");
 		fseek(fp,-BUFFERSIZE,SEEK_CUR);
 		FD_ZERO(&sendfd);
 		FD_ZERO(&ackfd);
