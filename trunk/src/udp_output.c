@@ -40,8 +40,6 @@ void pro_header_ack(int seq)
     printf("New timeout value: %ld microseconds\n",1000000*TIMEOUT.tv_sec+TIMEOUT.tv_usec);
   }
 
-  /* call reac_ack for congestion control */
-  reac_ack();
   //printf("New congestion window size: %d\n",cong_window.size);
 
   /* delete the node from timer list */
