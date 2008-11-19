@@ -31,10 +31,13 @@ int main(int argc, char **argv)
 			   recv_size/PACKET_SIZE=number of ack recv*/
 
   /* Read command line options */
-  while ((ch = getopt(argc, argv, "f:p:a:s:")) != -1) {
+  while ((ch = getopt(argc, argv, "f:p:a:s:w:")) != -1) {
     switch (ch) {
     case 's':
-      source_ip_str=optarg;
+      source_ip_str = optarg;
+      break;
+    case 'w':
+      send_window = atoi(optarg);
       break;
     case 'a':
       dst_ip_str = optarg;
@@ -46,7 +49,7 @@ int main(int argc, char **argv)
       port = atoi(optarg);
       break;
     case '?':
-      if (optopt == 'f' || optopt == 'p' || optopt == 'a') {
+      if (optopt == 'f' || optopt == 'p' || optopt == 'a' || optopt=='s' || optopt=='w') {
 	fprintf(stderr, "Option -%c requires an argument\n", optopt);
       }
       else {
@@ -65,7 +68,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: can not open send socket\n");
     exit(EXIT_FAILURE);
   }
-  
+
   /* create ack socket */
   /*
   if ((ack_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
@@ -89,8 +92,8 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: invalid ack address\n");
     exit(1);
   }
- 
-  memset((char *)&dst_addr, 0, sizeof(dst_addr));  
+
+  memset((char *)&dst_addr, 0, sizeof(dst_addr));
   dst_addr.sin_family = AF_INET;
   dst_addr.sin_port = htons(ack_port);
   if (inet_aton(dst_ip_str, &dst_addr.sin_addr) == 0) {
@@ -104,10 +107,10 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: can not bind ack socket\n");
     exit(EXIT_FAILURE);
   }
-  
+
   /* After bind port, change port to destination port */
   dst_addr.sin_port = htons(port);
-  
+
   printf("Bind on port %d to send and receive packet\n",ack_port);
   /* Open send file */
 
@@ -127,15 +130,17 @@ int main(int argc, char **argv)
   FD_ZERO(&ackfd);
   FD_SET(sock,&sendfd);
   FD_SET(sock,&ackfd);
+
   while(1) {
     if ((select(FD_SETSIZE,&ackfd,&sendfd,NULL,&tv))<=0) {
       /* Time out code put here */
       printf("time out \n");
+      reac_timeout();
       resend_packet(last_packet_acked,sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
       FD_ZERO(&sendfd);
       FD_ZERO(&ackfd);
       FD_SET(sock,&sendfd);
-      FD_SET(sock,&ackfd);      
+      FD_SET(sock,&ackfd);
       continue;
       //retran(sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
     }
@@ -158,7 +163,8 @@ int main(int argc, char **argv)
 	/* Sliding windows receive ack */
 	recv_ack=sender_receive_ack(head.ack);
 	if(recv_ack==correct_ack||recv_ack==in_window_ack)
-	  {pro_header_ack(head.ack);
+	  {
+	    pro_header_ack(head.ack);
 	    print_timer();
 	    int small_seq=0;
 	    if (TIMER_LIST->next!=0)
@@ -178,7 +184,7 @@ int main(int argc, char **argv)
 	else if (recv_ack==dup_ack)
 	  {
 	    dup_check++;
-	    printf("dup_check = %d \n",dup_check);   
+	    printf("dup_check = %d \n",dup_check);
 	    if (dup_check==3)	/* 3 duplicate ack, fast retransmit */
 	      {
 		sleep(1);
@@ -190,16 +196,16 @@ int main(int argc, char **argv)
       }
       continue;
     }
-    
+
     /* Send data */
     if (FD_ISSET(sock,&sendfd))
       {
 	if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
 	  {
-	    send_byte=rudp_send(sock, send_buf,	
+	    send_byte=rudp_send(sock, send_buf,
 				read_byte,			\
 				0,(struct sockaddr *)&dst_addr,	\
-				sizeof(dst_addr),&ack_addr);    
+				sizeof(dst_addr),&ack_addr);
 	    if(send_byte<0)
 	      {
 		/* We need to remove send socket from select() This make sure our
@@ -226,14 +232,18 @@ int main(int argc, char **argv)
 	  {
 	    //perror("Read file error:");
 	    printf("Send all data, read_byte %d \n",read_byte);
-	    break;		// Finish sending file 
+	    break;		// Finish sending file
 	  }
-	
-	
+
+
       }
   }
-  
+
   printf("Complete sending %s to %s:%d\n", filename, dst_ip_str, port);
+  printf("Slow Start phase: %d packets, %.2f%% of all packets\n",\
+      ss_n,100*((float)ss_n/(ss_n+ca_n)));
+  printf("Congestion Avoidance phase: %d packets, %.2f%% of all packets\n",\
+      ca_n,100*((float)ca_n/(ss_n+ca_n)));
   fclose(fp);
   return 0;
 }

@@ -12,6 +12,8 @@ struct cong_control {
 };
 
 extern struct cong_control cong_window;
+extern int ss_n;
+extern int ca_n;
 
 void reac_ack();
 void reac_timeout();

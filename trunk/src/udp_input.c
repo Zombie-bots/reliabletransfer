@@ -108,6 +108,7 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
     assert (size==PACKET_SIZE);
     assert (add_checksum(size, (u_char *)&(((struct sockaddr_in *)src_addr)->sin_addr.s_addr),
             (u_char *)&(self_addr->sin_addr.s_addr), size%2, (u_short *)buffer) == 0);
+    printf("checksum correct\n");
     read_header(&head,(packet_t *)buffer);
     assert (head.offset==PAYLOAD_SIZE || head.flag==FIN);
     printf("recevie packet %d\n",head.seq);

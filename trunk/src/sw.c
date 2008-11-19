@@ -1,5 +1,7 @@
 #include "sw.h"
+#include "cong_control.h"
 #include <assert.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 //extern short send_congestion_window;
@@ -25,7 +27,7 @@ unsigned short last_packet_sent = 0; //send next packet
 unsigned short last_packet_acked = 0; //last byte ack
 unsigned short send_window = 32; //advertised  window, max rcv buffer, last bye written
 
-unsigned short send_congestion_window = 33;
+//unsigned short send_congestion_window = 33;
 
 unsigned short initial_seq_number = 0;
 
@@ -40,13 +42,13 @@ unsigned short init_rec_seq_number = 0;
 short
 min(int x, int y)
 {
-  if (send_window <= send_congestion_window)
+  if (send_window <= cong_window.size)
     {
       return send_window;
     }
   else
     {
-      return send_congestion_window;
+      return cong_window.size;
     }
 }
 /*
@@ -59,7 +61,7 @@ sender_send_packet(short send_seq_number)
   //last_packet_acked, send_seq_number);
 
   if (last_packet_sent - last_packet_acked < min(send_window,
-      send_congestion_window))
+      cong_window.size))
     {
       //last_packet_sent += 1;
       //  printf("error1! lastsen: %d, lastAck: %d ", last_packet_sent, last_packet_acked);
@@ -109,7 +111,7 @@ sender_receive_ack(short send_seq_number)
 
       return out_window_ack;
     }
- 
+
   return dup_ack;
 }
 
