@@ -91,7 +91,7 @@ void send_ack(u_short seq)
     //src_addr.sin_port=htons(ACK_PORT);
     sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
         (struct sockaddr *)(&src_addr),sizeof(src_addr));
-    printf("send normal ack for %u to port %d\n",seq,ntohs(src_addr.sin_port));
+    printf("send ack seq %u \n",seq);
   }
 }
 
@@ -106,12 +106,12 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
 
   do {
     size = recvfrom(sock, (void *)buffer, PACKET_SIZE, 0, src_addr, src_addr_len);
-    //printf("sourse port: %d\n", ntohs(((struct sockaddr_in *)src_addr)->sin_port));
     assert (size==PACKET_SIZE);
     assert (add_checksum(size, (u_char *)&(((struct sockaddr_in *)src_addr)->sin_addr.s_addr),
             (u_char *)&(self_addr->sin_addr.s_addr), size%2, (u_short *)buffer) == 0);
     read_header(&head,(packet_t *)buffer);
     assert (head.offset==PAYLOAD_SIZE || head.flag==FIN);
+    printf("recevie packet %d\n",head.seq);
     sw_return = receiver_receive_packet(head.seq);
     if (sw_return == dropPkt) {
       send_ack(next_byte_expected-1);
@@ -119,14 +119,14 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
       continue;
     }
 
-    printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
-    *recv_size += head.offset;
+    //printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
     if (packet_lost(drop_p) && head.flag!=FIN) {
       next_byte_expected--;
       //p+=head.offset;
       printf("packet %u dropped\n",head.seq);
       continue;
     } else {
+      *recv_size += head.offset;
       read_packet((u_char *)p,(packet_t*)buffer,(u_short)head.offset);
       p+=head.offset;
     }

@@ -23,7 +23,7 @@ int main(int argc, char **argv)
   struct sockaddr_in dst_addr;
   struct sockaddr_in ack_addr;
   int sock;
-  char receive_buf[BUFFERSIZE];
+  char receive_buf[PACKET_SIZE];
   char send_buf[BUFFERSIZE];
   FILE *fp;
   int send_byte=0,read_byte=0;
@@ -123,6 +123,7 @@ int main(int argc, char **argv)
   tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
   int not_finish=0;
+  int dup_check=0;
   while(1) {
     
     FD_ZERO(&sendfd);
@@ -137,10 +138,11 @@ int main(int argc, char **argv)
     }
     /* Receive ACK */
     if (FD_ISSET(sock,&ackfd)) {
+      enum ack recv_ack;
       recv_size=recvfrom(sock,\
-          (void *)receive_buf,\
-          BUFFERSIZE, 0,\
-          NULL,NULL);
+			 (void *)receive_buf,PACKET_SIZE	\
+			 , 0,					\
+			 NULL,NULL);
       assert(recv_size%PACKET_SIZE==0);
       int i;
       header_t head;
@@ -149,13 +151,27 @@ int main(int argc, char **argv)
       /* loop through every ack packet */
       for (i=0;i<recv_size/PACKET_SIZE;i++) {
         read_header(&head,(packet_t*)recv_p);
-        printf("Ack %d Offset %d, Flag %d \n",head.ack,head.offset,head.flag);
+        printf("receive Ack %d \n",head.ack);
 	/* Sliding windows receive ack */
-	if(sender_receive_ack(head.ack)==correct_ack)
+	recv_ack=sender_receive_ack(head.ack);
+	if(recv_ack==correct_ack)
 	  {pro_header_ack(head.ack);
 	    tv.tv_sec=TIMEOUT.tv_sec;
 	    tv.tv_usec=TIMEOUT.tv_usec;
 	    recv_p+=PACKET_SIZE;
+	  }
+	else if (recv_ack==dup_ack)
+	  {
+	    dup_check++;
+	    printf("dup_check = %d \n",dup_check);   
+	    if (dup_check==3)	/* 3 duplicate ack, fast retransmit */
+	      {
+		sleep(1);
+		dup_check=0;
+		resend_packet(head.ack,sock,(struct sockaddr *)&dst_addr,
+			      sizeof(dst_addr));
+		print_timer();
+	      }
 	  }
       }
       continue;
@@ -164,35 +180,22 @@ int main(int argc, char **argv)
     /* Send data */
     if (FD_ISSET(sock,&sendfd))
       {
-	/*
-	if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0) {
-	  send_byte+=rudp_send(sock, send_buf,\
-			       read_byte-send_byte, \
-			       0,(struct sockaddr *)&dst_addr, \
-			       sizeof(dst_addr),&ack_addr);
-	  printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-	  send_byte=0;
-	  // Sleep after send, give receiver little more time
-	  usleep(1000);
-	} else   // Finish all data 
-	  break;
-	*/
-       
-	if (not_finish||(read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
+	if ((read_byte=fread(send_buf,1,BUFFERSIZE,fp))>0)
 	  {
 	    send_byte=rudp_send(sock, send_buf,	
 				read_byte,			\
 				0,(struct sockaddr *)&dst_addr,	\
 				sizeof(dst_addr),&ack_addr);    
-	    //printf("send_byts %d, read_byte %d\n",send_byte,read_byte);
-	    not_finish=(send_byte>0)?0:1;
-	    // Sleep after send, give receiver little more time 
-	    //printf("read_byte %d\n ",read_byte);
+	    /* sliding window not allow to send. So we send the same buffer next time */
+	    if(send_byte<0)
+	      {
+		fseek(fp,-BUFFERSIZE,SEEK_CUR);
+	      }
 	    usleep(1000);
 	  }
 	else
 	  {
-	    perror("Read file error:");
+	    //perror("Read file error:");
 	    printf("Send all data, read_byte %d \n",read_byte);
 	    break;		// Finish sending file 
 	  }

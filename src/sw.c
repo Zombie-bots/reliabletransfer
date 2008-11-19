@@ -62,7 +62,7 @@ sender_send_packet(short send_seq_number)
     {
       //last_packet_sent += 1;
       //  printf("error1! lastsen: %d, lastAck: %d ", last_packet_sent, last_packet_acked);
-      printf("sw allow %d \n",send_seq_number);
+      // printf("sw allow %d \n",send_seq_number);
       return 1;
     }
   else
@@ -78,34 +78,33 @@ sender_send_packet(short send_seq_number)
 enum ack
 sender_receive_ack(short send_seq_number)
 {
-  printf("ACK: ackSq:  %d, lastAck: %d , last sen:  %d!",
-      send_seq_number, last_packet_acked, last_packet_sent);
+  //  printf("ACK: ackSq:  %d, lastAck: %d , last sen:  %d\n",
+  //  send_seq_number, last_packet_acked, last_packet_sent);
 
   if ((send_seq_number == last_packet_acked + 1) && (last_packet_acked
       < last_packet_sent) && (last_packet_sent <= (send_window
       + last_packet_acked)))
     {
       last_packet_acked = last_packet_acked + 1;
-      printf("correct_ack");
 
       return correct_ack;
     }
   else if (last_packet_acked < send_seq_number && send_seq_number
       < (send_window + last_packet_acked))
     {
-      printf("error2! in_window_ack");
-
+      printf("in_window_ack\n");
       return in_window_ack;
     }
 
   else if (send_seq_number < last_packet_acked && send_seq_number
       > (send_window + last_packet_acked))
     {
-      printf("error1!,out_window_ack;");
+      printf("out_window_ack\n");
 
       return out_window_ack;
     }
-  return out_window_ack;
+ 
+  return dup_ack;
 }
 
 /*
@@ -115,10 +114,9 @@ enum recPkt
 receiver_receive_packet(short recieve_seq_number)
 {
   //assert(next_byte_expected<=last_byte_received);
-  //printf("\n eeeeeeeeeeerror0! expect: %d , lastrec: %d, sqrec %d", next_byte_expected, last_byte_received, recieve_seq_number);
+  //printf("next expect: %d , lastrec: %d, sqrec %d", next_byte_expected, last_byte_received, recieve_seq_number);
   if (init_rec_seq_number == 0)
     {
-
       init_rec_seq_number = recieve_seq_number;
     }
   /*
@@ -137,8 +135,7 @@ receiver_receive_packet(short recieve_seq_number)
   if (next_byte_expected == recieve_seq_number)
     {
       next_byte_expected = next_byte_expected + 1;
-      printf("next packet: %d\n",next_byte_expected);
-
+      //printf("next packet: %d\n",next_byte_expected);
       return acceptPkt;
     }
   else
