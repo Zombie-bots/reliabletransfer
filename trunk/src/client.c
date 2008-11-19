@@ -78,10 +78,11 @@ int main(int argc, char **argv)
   do {
     flag = rudp_recv(sock, receive_buf, &self_addr, (struct sockaddr *)&src_addr,\
                      &src_addr_len, &recv_size);
-    do {
-      write_size = fwrite(receive_buf+write_size, 1, recv_size-write_size, fp);
-    } while (write_size != recv_size);
-    printf("receive_bytes %d, write_bytes %d\n",recv_size, write_size);
+    printf("receive_bytes %d\n",recv_size);
+    // do {
+    fwrite(receive_buf, 1, recv_size, fp);
+    //} while (write_size != recv_size);
+    
     recv_size = write_size = 0;
   } while (flag != FIN);
 

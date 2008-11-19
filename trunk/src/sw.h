@@ -3,7 +3,7 @@
 #define FALSE 0
 #define TRUE 1
 
-enum ack {correct_ack,in_window_ack,out_window_ack};
+enum ack {correct_ack,in_window_ack,out_window_ack,dup_ack};
 enum recPkt {dropPkt,acceptPkt};
 
 extern unsigned short last_packet_sent; //send next packet

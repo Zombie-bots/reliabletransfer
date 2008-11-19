@@ -8,6 +8,7 @@ struct node
   int data;//SeqNum
   struct timeval send_time;
   struct timeval expire_time;
+  int resend;
   packet_t sent_packet;
   struct node *next;
 };

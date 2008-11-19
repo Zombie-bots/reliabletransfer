@@ -12,6 +12,6 @@
 #include "timeout.h"
 #include "cong_control.h"
 #include "udp_output.h"
-#define BUFFERSIZE (PAYLOAD_SIZE)*4
+#define BUFFERSIZE PAYLOAD_SIZE
 
 #endif

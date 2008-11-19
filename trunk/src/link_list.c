@@ -15,6 +15,7 @@ void make_node (packet_t *packet, struct node *pnode)
 {
   pnode->data = packet->header.seq;
   pnode->sent_packet = *packet;
+  pnode->resend=0;
   gettimeofday(&pnode->send_time, (void *)0);
   timersum(pnode->expire_time, pnode->send_time, TIMEOUT);
 }

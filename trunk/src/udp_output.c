@@ -50,6 +50,11 @@ void pro_header_ack(int seq)
   /* delete the node from timer list */
   delnode(r);
   /*
+  */
+}
+
+void print_timer()
+{
   printf("Timer list:\n");
   struct node *np;
   np = TIMER_LIST->next;
@@ -57,7 +62,32 @@ void pro_header_ack(int seq)
     printf("seq: %u\n", np->data);
     np = np->next;
   }
-  */
+}
+
+/* Resend packet to client */
+void resend_packet(int seq_number, int socket, const struct sockaddr *to, socklen_t tolen)
+{
+  struct node *r;
+  r = TIMER_LIST;
+  while(r->next !=0)
+    {
+      if(seq_number==r->next->data)
+	{
+	  while(r->next!=0){
+	  printf("Resend packet %d \n",r->next->sent_packet.header.seq);
+	  r->next->resend=1;
+	  sendto(socket,
+		 &r->next->sent_packet,
+		 PACKET_SIZE, 0, to, tolen);
+	  r=r->next;
+	  }
+	  break;
+	}
+      else{
+	r=r->next;
+      }
+    }
+  //printf("Can not find resend packet\n");
 }
 
 /* THIS FUNCTION DEALS WITH THE RETRANSMISSION ISSUE */
@@ -106,7 +136,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
   u_char * s, *d;
   d = (u_char*) &dest->sin_addr.s_addr;
   s = (u_char*) &src_addr->sin_addr.s_addr;
-  printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
+  //printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
   for (send_size=already_send*(PAYLOAD_SIZE); send_size < length; send_size += (PAYLOAD_SIZE)) {  
     /* Test if we can send packet,  */
     if(sender_send_packet(last_packet_sent))
@@ -119,10 +149,10 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       }
     else 
       {
-      printf("rudp_send reject sending packet. because sliding window return false\n");
+	//printf("rudp_send reject sending packet. because sliding window return false\n");
       return -1;
       }
-    //printf("send packet %d left_size %d \n",last_packet_sent,left_size);
+    printf("send packet %d \n",last_packet_sent);
     if (left_size >= PAYLOAD_SIZE) {
       /* Not last packet */
       fill_header(last_packet_sent, 0, PAYLOAD_SIZE,ACK, &packet);
