@@ -159,7 +159,7 @@ int main(int argc, char **argv)
       /* loop through every ack packet */
       for (i=0;i<recv_size/PACKET_SIZE;i++) {
         read_header(&head,(packet_t*)recv_p);
-        printf("receive Ack %d last_packet_acked %d\n",head.ack,last_packet_acked);
+        printf("------receive Ack %d last_packet_acked %d\n",head.ack,last_packet_acked);
 	/* Sliding windows receive ack */
 	recv_ack=sender_receive_ack(head.ack);
 	if(recv_ack==correct_ack||recv_ack==in_window_ack)
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 	    reac_ack();
 	    pro_header_ack(head.ack);
 	    print_timer();
-	    int small_seq=0;
+	       int small_seq=0;
 	    if (TIMER_LIST->next!=0)
 	      {
 		small_seq=TIMER_LIST->next->data;
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 	    if(small_seq!=0)
 	      {last_packet_acked=small_seq;}
 	    else
-	      {last_packet_acked=last_byte_received;}
+	      {last_packet_acked=last_packet_sent;}
 
 	    tv.tv_sec=TIMEOUT.tv_sec;
 	    tv.tv_usec=TIMEOUT.tv_usec;
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 	    printf("dup_check = %d \n",dup_check);
 	    if (dup_check==3)	/* 3 duplicate ack, fast retransmit */
 	      {
-		sleep(1);
+		//sleep(1);
 		reac_tripack();
 		dup_check=0;
 		resend_packet(head.ack,sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));

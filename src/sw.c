@@ -25,9 +25,11 @@
  */
 unsigned short last_packet_sent = 0; //send next packet
 unsigned short last_packet_acked = 0; //last byte ack
-unsigned short send_window = 32; //advertised  window, max rcv buffer, last bye written
+unsigned short send_window = 100; //advertised  window, max rcv buffer, last bye written
+
 
 //unsigned short send_congestion_window = 33;
+
 
 unsigned short initial_seq_number = 0;
 
@@ -81,8 +83,8 @@ sender_send_packet(short send_seq_number)
 enum ack
 sender_receive_ack(short send_seq_number)
 {
-  //  printf("ACK: ackSq:  %d, lastAck: %d , last sen:  %d\n",
-  //  send_seq_number, last_packet_acked, last_packet_sent);
+   printf("ACK: ackSq:  %d, lastAck: %d , last sen:  %d\n",
+   send_seq_number, last_packet_acked, last_packet_sent);
 
   if ((send_seq_number == last_packet_acked + 1) && (last_packet_acked
       < last_packet_sent) && (last_packet_sent <= (send_window
@@ -97,8 +99,8 @@ sender_receive_ack(short send_seq_number)
     {
       if(last_byte_received<send_seq_number)
 	{
-	  printf("update last received packet to %d\n",send_seq_number);
-	  last_byte_received=send_seq_number;
+	  //printf("update last received packet to %d\n",send_seq_number);
+	  //last_byte_received=send_seq_number;
 	}
       printf("in_window_ack\n");
       return in_window_ack;
@@ -111,7 +113,7 @@ sender_receive_ack(short send_seq_number)
 
       return out_window_ack;
     }
-
+  printf("dup_ack\n");
   return dup_ack;
 }
 
