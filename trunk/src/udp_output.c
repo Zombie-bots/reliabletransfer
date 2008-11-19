@@ -137,7 +137,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
   d = (u_char*) &dest->sin_addr.s_addr;
   s = (u_char*) &src_addr->sin_addr.s_addr;
   //printf("send packet %d length %d already_send %d\n",last_packet_sent,length,already_send);
-  for (send_size=already_send*(PAYLOAD_SIZE); send_size < length; send_size += (PAYLOAD_SIZE)) {  
+  for (send_size=0; send_size < length; send_size += (PAYLOAD_SIZE)) {  
     /* Test if we can send packet,  */
     if(sender_send_packet(last_packet_sent))
       {
@@ -150,7 +150,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
     else 
       {
 	//printf("rudp_send reject sending packet. because sliding window return false\n");
-      return -1;
+	return -1;
       }
     printf("send packet %d \n",last_packet_sent);
     if (left_size >= PAYLOAD_SIZE) {
@@ -171,7 +171,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       make_node(&packet, pnode);
       append(pnode);
       last_packet_sent++;
-      already_send++;
+      //already_send++;
 	
  
     } else {
@@ -193,7 +193,7 @@ int rudp_send(int socket, char *buffer, size_t length, int flags,
       make_node(&packet, pnode);
       append(pnode);
       last_packet_sent++;
-      already_send++;
+      //already_send++;
       return length;
     }
     if (real_send_size == -1) {

@@ -122,17 +122,21 @@ int main(int argc, char **argv)
   tv.tv_sec=3;
   tv.tv_usec=0;
   //printf("before  dst %s \n",inet_ntoa(dst_addr.sin_addr));
-  int not_finish=0;
   int dup_check=0;
+  FD_ZERO(&sendfd);
+  FD_ZERO(&ackfd);
+  FD_SET(sock,&sendfd);
+  FD_SET(sock,&ackfd);
   while(1) {
-    
-    FD_ZERO(&sendfd);
-    FD_ZERO(&ackfd);
-    FD_SET(sock,&sendfd);
-    FD_SET(sock,&ackfd);
     if ((select(FD_SETSIZE,&ackfd,&sendfd,NULL,&tv))<=0) {
       /* Time out code put here */
       printf("time out \n");
+      resend_packet(last_packet_acked,sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
+      sleep(2);
+      FD_ZERO(&sendfd);
+      FD_ZERO(&ackfd);
+      FD_SET(sock,&sendfd);
+      FD_SET(sock,&ackfd);      
       continue;
       //retran(sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
     }
@@ -168,8 +172,7 @@ int main(int argc, char **argv)
 	      {
 		sleep(1);
 		dup_check=0;
-		resend_packet(head.ack,sock,(struct sockaddr *)&dst_addr,
-			      sizeof(dst_addr));
+		resend_packet(head.ack,sock,(struct sockaddr *)&dst_addr,sizeof(dst_addr));
 		print_timer();
 	      }
 	  }
@@ -186,10 +189,24 @@ int main(int argc, char **argv)
 				read_byte,			\
 				0,(struct sockaddr *)&dst_addr,	\
 				sizeof(dst_addr),&ack_addr);    
-	    /* sliding window not allow to send. So we send the same buffer next time */
 	    if(send_byte<0)
 	      {
+		/* We need to remove send socket from select() This make sure our
+		   time out codes have a chance to work. Otherwise, select() always can
+		   send. */
+		/* sliding window not allow to send. So we send the same buffer next time */
 		fseek(fp,-BUFFERSIZE,SEEK_CUR);
+		FD_ZERO(&sendfd);
+		FD_ZERO(&ackfd);
+		FD_SET(sock,&ackfd);
+
+	      }
+	    else
+	      {
+		FD_ZERO(&sendfd);
+		FD_ZERO(&ackfd);
+		FD_SET(sock,&sendfd);
+		FD_SET(sock,&ackfd);
 	      }
 	    usleep(1000);
 	  }
