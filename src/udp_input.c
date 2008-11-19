@@ -63,8 +63,8 @@ void traverse_dh()
     gettimeofday(&current, NULL);
     timersubtract(diff,p->next->tv,current);
     if (diff.tv_sec < 0) {
-      printf("send ack number back to server %u\n",ack_p.header.ack);
       make_ack(p->next->seq, &ack_p);
+      printf("send ack sequence number %u\n",ack_p.header.ack);
       sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
           (struct sockaddr *)(&src_addr),sizeof(src_addr));
       struct delay_node *q;
@@ -88,10 +88,9 @@ void send_ack(u_short seq)
     if (delay_p != 0) {
       traverse_dh();
     }
-    //src_addr.sin_port=htons(ACK_PORT);
     sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
         (struct sockaddr *)(&src_addr),sizeof(src_addr));
-    printf("send ack seq %u \n",seq);
+    printf("send ack seq %u \n",seq+1);
   }
 }
 
