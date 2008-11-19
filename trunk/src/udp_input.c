@@ -111,7 +111,15 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
     printf("checksum correct\n");
     read_header(&head,(packet_t *)buffer);
     assert (head.offset==PAYLOAD_SIZE || head.flag==FIN);
-    printf("recevie packet %d\n",head.seq);
+    printf("-----------recevie packet %d\n",head.seq);
+    if (packet_lost(drop_p) && head.flag!=FIN) {
+      // next_byte_expected--;
+      //p+=head.offset;
+      printf("packet %u dropped\n",head.seq);
+      continue;
+    }
+
+
     sw_return = receiver_receive_packet(head.seq);
     if (sw_return == dropPkt) {
       send_ack(next_byte_expected-1);
@@ -120,16 +128,10 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
     }
 
     //printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
-    if (packet_lost(drop_p) && head.flag!=FIN) {
-      next_byte_expected--;
-      //p+=head.offset;
-      printf("packet %u dropped\n",head.seq);
-      continue;
-    } else {
-      *recv_size += head.offset;
-      read_packet((u_char *)p,(packet_t*)buffer,(u_short)head.offset);
-      p+=head.offset;
-    }
+     
+    *recv_size += head.offset;
+    read_packet((u_char *)p,(packet_t*)buffer,(u_short)head.offset);
+    p+=head.offset;
     send_ack(head.seq);
     if (head.flag==FIN) {
       if (delay_p != 0) {
