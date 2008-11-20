@@ -1,0 +1,19 @@
+     
+    0                              15                              31
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         Sequence Number       |       Acknowledgment Number   | 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |           Checksum            |            Offset10 Flag 6    |  
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             data                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Sequence Number       : 16bits sequence number
+Acknowledgment Number : 16bits sequence number
+Checksum              : 16bits checksum with pseudo header
+Offset/Ack            : 16bits offest indicate last byte offset. Since our packet is fixed 1024 byte, so offset range from 0 to 1016 
+                        if offset==0, no data in packet 
+                        if offset== represent Ack
+                        if offset==2 End of file in
+                        
+
