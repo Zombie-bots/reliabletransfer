@@ -122,8 +122,11 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
 
     sw_return = receiver_receive_packet(head.seq);
     if (sw_return == dropPkt) {
-      send_ack(next_byte_expected-1);
-      printf("seq wrong. drop packet %d. send ack for %d\n",head.seq,next_byte_expected);
+      if(head.seq>next_byte_expected)
+	{
+	  send_ack(next_byte_expected-1);
+	  printf("seq wrong. drop packet %d. send ack for %d\n",head.seq,next_byte_expected);
+	}
       continue;
     }
 
