@@ -221,7 +221,6 @@ int main(int argc, char **argv)
 		FD_ZERO(&sendfd);
 		FD_ZERO(&ackfd);
 		FD_SET(sock,&ackfd);
-
 	      }
 	    else
 	      {
@@ -238,8 +237,6 @@ int main(int argc, char **argv)
 	    printf("Send all data, read_byte %d \n",read_byte);
 	    break;		// Finish sending file
 	  }
-
-
       }
   }
 
@@ -248,6 +245,7 @@ int main(int argc, char **argv)
       ss_n,100*((float)ss_n/(ss_n+ca_n)));
   printf("Congestion Avoidance phase: %d packets, %.2f%% of all packets\n",\
       ca_n,100*((float)ca_n/(ss_n+ca_n)));
+  printf("congestion window: %d\n",cong_window.size);
   fclose(fp);
   return 0;
 }
