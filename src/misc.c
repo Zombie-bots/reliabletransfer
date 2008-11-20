@@ -1,4 +1,5 @@
 #include "misc.h"
+#include <stdlib.h>
 /*
  * input possibility range from 0-100 , max sleep time msec,
  *  It randomly sleep for less msec millaseconds. If no sleep return

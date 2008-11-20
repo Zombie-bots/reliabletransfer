@@ -27,7 +27,7 @@ extern unsigned short init_rec_seq_number;
 /*
  * this function finds minimum value between two variable
  */
-short min(int x,int y);
+unsigned short min(int x,int y);
 /*
  * update sliding window variables when sender send packet
  */
