@@ -3,17 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "../src/sw.h"
-
-// sender variable
-extern short last_packet_send;
-extern short last_packet_ack;
-extern short send_window;
-extern short initial_seq_number;
-
-// receiver variable
-extern short rcvWindow;
-extern short next_byte_expected;
-extern short init_rec_seq_number;
+#include "../src/cong_control.h"
 
 int main(int argc, char *argv[]) {
 	int send_seq_num = initial_seq_number;
@@ -23,11 +13,15 @@ int main(int argc, char *argv[]) {
 	int i;
 	enum ack ack_result;
 	enum recPkt rpResult;
+
+	send_window = 4;
+	cong_window.size = 8;
 	//sender send 4 packet and the window size is 4
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < send_window; i++) {
 		ret_val = sender_send_packet(send_seq_num);
 		assert(ret_val==TRUE);
 		send_seq_num++;
+		last_packet_sent++;
 	}
 	/* Sender already sent 4 packet, can not send any more */
 	ret_val = sender_send_packet(send_seq_num);
@@ -39,6 +33,7 @@ int main(int argc, char *argv[]) {
 	assert(ack_result==correct_ack);
 
 	ret_val = sender_send_packet(send_seq_num);
+	last_packet_sent++;
 	assert(ret_val==TRUE);
 	// Send one packet, Then should not send anymore
 	ret_val = sender_send_packet(send_seq_num);

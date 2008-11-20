@@ -90,7 +90,8 @@ void send_ack(u_short seq)
     }
     sendto(sock,(void *)&ack_p,PACKET_SIZE,0,
         (struct sockaddr *)(&src_addr),sizeof(src_addr));
-    printf("send ack seq %u \n",seq+1);
+    printf("send ack seq %u to %s:%d\n",
+        seq+1,inet_ntoa(src_addr.sin_addr),ntohs(src_addr.sin_port));
   }
 }
 
@@ -131,7 +132,7 @@ int rudp_recv(int sock, char *receive_buf, struct sockaddr_in *self_addr,\
     }
 
     //printf("Seq %d Ack %d Offset %d, Flag %d \n",head.seq,head.ack,head.offset,head.flag);
-     
+
     *recv_size += head.offset;
     read_packet((u_char *)p,(packet_t*)buffer,(u_short)head.offset);
     p+=head.offset;
