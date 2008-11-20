@@ -175,8 +175,6 @@ int main(int argc, char **argv)
 	      }
 	    if(small_seq!=0)
 	      {last_packet_acked=small_seq;}
-	    else
-	      {last_packet_acked=last_packet_sent;}
 
 	    tv.tv_sec=TIMEOUT.tv_sec;
 	    tv.tv_usec=TIMEOUT.tv_usec;

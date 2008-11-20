@@ -99,8 +99,8 @@ sender_receive_ack(short send_seq_number)
     {
       if(last_byte_received<send_seq_number)
 	{
-	  //printf("update last received packet to %d\n",send_seq_number);
-	  //last_byte_received=send_seq_number;
+	  printf("update last received packet to %d\n",send_seq_number);
+	  last_byte_received=send_seq_number;
 	}
       printf("in_window_ack\n");
       return in_window_ack;
