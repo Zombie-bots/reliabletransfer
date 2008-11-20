@@ -41,7 +41,7 @@ unsigned short last_byte_received = 0; //receive next packet , last byte written
 unsigned short next_byte_expected = 0;
 unsigned short init_rec_seq_number = 0;
 
-short
+unsigned short
 min(int x, int y)
 {
   if (send_window <= cong_window.size)
@@ -72,7 +72,8 @@ sender_send_packet(short send_seq_number)
     }
   else
     {
-      printf("sw reject %d \n",send_seq_number);
+      
+      printf("sw reject %u sendwin %d congwin %d \n",send_seq_number, send_window, cong_window.size);
       return 0;
     }
 }
@@ -83,8 +84,10 @@ sender_send_packet(short send_seq_number)
 enum ack
 sender_receive_ack(short send_seq_number)
 {
-   printf("ACK: ackSq:  %d, lastAck: %d , last sen:  %d\n",
+   printf("ACK: ackSq:  %u, lastAck: %u , last sen:  %u\n",
    send_seq_number, last_packet_acked, last_packet_sent);
+   if (send_seq_number==0 && last_packet_acked==65535)
+     { printf("Warp round\n");  }
 
   if ((send_seq_number == last_packet_acked + 1) && (last_packet_acked
       < last_packet_sent) && (last_packet_sent <= (send_window
@@ -128,6 +131,7 @@ receiver_receive_packet(short recieve_seq_number)
   if (init_rec_seq_number == 0)
     {
       init_rec_seq_number = recieve_seq_number;
+      next_byte_expected = recieve_seq_number;
     }
   /*
    if (next_byte_expected==last_byte_received){
