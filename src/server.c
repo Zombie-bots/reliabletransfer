@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   /* Default input value  */
   char ch, *filename = (char*) "sendfile.txt", *dst_ip_str = (char*) "127.0.0.1";
   int port = 3322;
-  int ack_port=3323;
+  int ack_port=63443;
   //int ack_port = 3323;
   char *source_ip_str= (char *) "127.0.0.1";
   int reuse_addr=1;
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
   /* create socket */
 
-  if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+  if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
     fprintf(stderr, "Error: can not open send socket\n");
     exit(EXIT_FAILURE);
   }
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
    * we need to use this ip to calculate right check sum*/
   memset((char *)&ack_addr, 0, sizeof(ack_addr));
   ack_addr.sin_family = AF_INET;
-  ack_addr.sin_port = htons(port);
+  ack_addr.sin_port = htons(ack_port);
   if (inet_aton(source_ip_str, &ack_addr.sin_addr) == 0) {
     fprintf(stderr, "Error: invalid ack address\n");
     exit(1);
@@ -96,16 +96,19 @@ int main(int argc, char **argv)
   memset((char *)&dst_addr, 0, sizeof(dst_addr));
   dst_addr.sin_family = AF_INET;
   dst_addr.sin_port = htons(ack_port);
-  if (inet_aton(dst_ip_str, &dst_addr.sin_addr) == 0) {
-    fprintf(stderr, "Error: invalid destination address\n");
-    exit(1);
-  }
+  dst_addr.sin_addr.s_addr=INADDR_ANY;
 
   /* We need to bind this udp so we know which port returns ack */
 
   if (bind(sock, (struct sockaddr *) &dst_addr, sizeof(dst_addr)) == -1) {
+    perror("bind socket:");
     fprintf(stderr, "Error: can not bind ack socket\n");
     exit(EXIT_FAILURE);
+  }
+
+  if (inet_aton(dst_ip_str, &dst_addr.sin_addr) == 0) {
+    fprintf(stderr, "Error: invalid destination address\n");
+    exit(1);
   }
 
   /* After bind port, change port to destination port */
@@ -227,7 +230,7 @@ int main(int argc, char **argv)
 		FD_SET(sock,&sendfd);
 		FD_SET(sock,&ackfd);
 	      }
-	    usleep(1000);
+	    usleep(10000);
 	  }
 	else
 	  {
