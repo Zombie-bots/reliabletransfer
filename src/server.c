@@ -118,7 +118,7 @@ int main(int argc, char **argv)
   /* Open send file */
 
   if ((fp = fopen(filename, "r")) == NULL) {
-    fprintf(stderr, "Error: can not open file\n");
+    fprintf(stderr, "Error: can not open file, Use -f file_name to indicate the file you want to send\n");
     exit(1);
   }
   TIMER_LIST = (struct node *)malloc(sizeof(struct node));

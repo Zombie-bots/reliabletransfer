@@ -73,7 +73,7 @@ sender_send_packet(short send_seq_number)
   else
     {
       
-      printf("sw reject %u sendwin %d congwin %d \n",send_seq_number, send_window, cong_window.size);
+      printf("sw reject %u sendwin %d congwin %d \n",send_seq_number, send_window,(int) cong_window.size);
       return 0;
     }
 }
