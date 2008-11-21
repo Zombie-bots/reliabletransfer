@@ -1,6 +1,6 @@
 #include "link_list.h"
 #include "timeout.h"
-#include <malloc.h>
+#include <stdlib.h>
 #include <assert.h>
 
 struct node *TIMER_LIST;

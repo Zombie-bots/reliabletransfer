@@ -4,4 +4,43 @@ reliable_udp is free software. Please see the file COPYING for details.
 For documentation, please see the files in the doc subdirectory.
 For building and installation instructions please see the INSTALL file.
 
-  Author: Lei Chen, Chao Sun, Azadeh Nematzadeh
+Compile Note:
+./reconf
+./configure
+make
+
+Usage:
+Test in 127.0.0.1 Network
+./client -f FileNameYouWantToSave
+start another console
+./server -f FileNameYouWantToSend
+
+Test in real network:
+
+first start client
+./client -f FileNameYouWantToSave -p PortNumber -a NetworkIPAddressForClient
+
+then client will wait on NetworkIPAddressForClient:PortNumber 
+
+Start server
+./server -f FileNameYouWantToSend -p PortNumber -a NetworkIPAddressForClient -s ServerNetworkIPAddress
+The NetworkIPAddressForClient:PortNumber will receive packet from sever
+
+Test Drop Packet:
+add -o possibilty_of_packet_lost
+
+./client -f FileNameYouWantToSave -o 2 
+this command drops 5 out of 100 packets
+
+Test Delay:
+add -l possibilty -t delaytime
+  
+./client -f FileNameYouWantToSave -l 2 -t 2000
+this command delay 2% packets 2000 microseconds. 
+
+Known Limitation:
+
+Client can not accept random sequence number packets. So if random sequence number, Client just simplely drops all packets after that. This will cause Server retransmite 
+all packets after the lost packet. This design limitation is the reason why sometime transfer stop in the middle of file.
+
+If packets drop rate over 10% or delay over 100000 microseconds, it is very easy to stop in the middle of transfer.
